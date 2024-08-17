@@ -5,9 +5,8 @@ from enum import Enum
 from typing import List
 import abjad
 import random
+import sqlalchemy
 from auth import router as auth_router
-
-
 
 # Create FastAPI app
 app = fastapi.FastAPI()
@@ -19,8 +18,6 @@ class BeatType(Enum):
     EIGHTH = ("eighth", 2)
     TRIPLET = ("triplet", 3)
     SIXTEENTH = ("sixteenth", 4)
-    
-
 
 class Beat():
     beatType: BeatType
@@ -33,7 +30,7 @@ endlessQuarterFOC = 3.0
 endlessEighthFOC = 30.0
 
 @app.get("/api/set/level/{level}?number={setNumber}&time={time}")
-def generateBeatTypesForMeasure(sets: int) -> List[BeatType]:
+def generateBeatTypesForMeasureEndless(sets: int) -> List[BeatType]:
     beatTypeList: List[BeatType] = []
     for x in range(4):
         randFloat = random.random()
@@ -45,7 +42,22 @@ def generateBeatTypesForMeasure(sets: int) -> List[BeatType]:
             beatTypeList.append(BeatType.SIXTEENTH)
         elif(randFloat > pow(0.32, (sets + 2)/endlessEighthFOC) + pow(0.32, (sets + 29)/endlessQuarterFOC) + 0.32):
             beatTypeList.append(BeatType.TRIPLET)   
-    return beatTypeList        
+    return beatTypeList       
+
+def generateTempo(level: int, sets: int) -> int:
+    match level:
+        case 1:
+            return 87
+        case 2:
+            return 87
+        case 3:
+            return 97
+        case 4:
+            return 100
+        case 5:
+            return 110
+        case 6:
+            return 100 * (1 * (0.05 * sets))
 
 # Randomly generate all the notes in a beat
 def generateNoteValues(beatType: BeatType) -> Beat:
@@ -62,8 +74,9 @@ def generateMeasure(beats: List[BeatType]) -> List[Beat]:
         measure.append(generateNoteValues(beats[x]))
     return measure
     
-def generateLilyPond(notes: List[Beat]):
+def generateLilyPondPNG(notes: List[Beat]):
     rhythmString = ""
+
     for note in notes:
         noteValues = note.noteValues
         beatType = note.beatType
@@ -83,9 +96,10 @@ def generateLilyPond(notes: List[Beat]):
                     tempString += "r8 "
             tempString += "} "
             rhythmString += "\\tuplet 3/2 " + tempString
+
     voice = abjad.Voice(rhythmString)
-    staff = abjad.Staff([voice], lilypond_type="RhythmicStaff")
-    print(rhythmString)
+    staff = abjad.Staff([voice], name="rhythmEndless", lilypond_type="RhythmicStaff")
+    abjad.persist.as_png(staff)
     return rhythmString
 
 # takes a list of beats and turns it into the frontend format
@@ -104,8 +118,7 @@ def createFrontendList(beats: List[Beat]) -> List[float]:
 
 @app.get("/api/set/level/{level}?number={setNumber}&time={time}")
 def getFrontendList(setNumber: int) -> List[float]:
-    return createFrontendList(generateMeasure(generateBeatTypesForMeasure(setNumber)))
-
+    return createFrontendList(generateMeasure(generateBeatTypesForMeasureEndless(setNumber)))
 
 # Define default root route
 @app.get("/")
@@ -114,12 +127,13 @@ async def root():
 
 @app.get("/test")
 async def test():
-    result = generateLilyPond(generateMeasure(generateBeatTypesForMeasure(13)))
+    result = generateLilyPondPNG(generateMeasure(generateBeatTypesForMeasureEndless(13)))
     return {"result": result}
 
 # For some reason on windows you have to use this command even though port is defined
 # uvicorn app:app --reload --port 5000
 if __name__ == '__main__':
+    print(([generateLilyPondPNG(generateMeasure(generateBeatTypesForMeasureEndless(13)))]))
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5000) 
     

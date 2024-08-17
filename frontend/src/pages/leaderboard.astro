@@ -1,0 +1,34 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/Navbar.astro";
+import Card from "../components/Card";
+import { map } from "astro/zod";
+
+const output = [1, 2, 3, 4, 5, 6];
+---
+
+<Layout title="Leaderboard">
+    <main>
+        <Navbar />
+        <div class="">
+            <h1 class="m-4 text-5xl font-extrabold mb-8 text-center">
+                Leaderboards
+            </h1>
+            <div class="flex flex-col m-4 space-y-8">
+                {
+                    output.map((i) => (
+                        <div class="mx-auto w-full max-w-md hover:even:rotate-1 hover:odd:-rotate-1 hover:scale-105">
+                            <a href={`/leaderboard/${i}`}>
+                                <Card>
+                                    <div class="m-4 text-3xl font-extrabold text-center">
+                                        Level {i}
+                                    </div>
+                                </Card>
+                            </a>
+                        </div>
+                    ))
+                }
+            </div>
+        </div>
+    </main>
+</Layout>

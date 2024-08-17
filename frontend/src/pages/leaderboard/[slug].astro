@@ -1,0 +1,30 @@
+---
+import type { GetStaticPaths } from "astro";
+import Layout from "../../layouts/Layout.astro";
+import Navbar from "../../components/Navbar.astro";
+import LeaderboardCard from "../../components/LeaderboardCard.jsx";
+
+const { slug } = Astro.params;
+
+export const getStaticPaths = (() => {
+    return [1, 2, 3, 4, 5, 6].map((i) => ({
+        params: { slug: i.toString() },
+    }));
+}) satisfies GetStaticPaths;
+---
+
+<Layout title={`Level ${slug} Leaderboard`}>
+    <Navbar />
+    <main>
+        <div class="text-center">
+            <h1 class="m-8 text-3xl font-extrabold">
+                Level {slug} Leaderboard
+            </h1>
+            <div class="m-4">
+                <div class="max-w-lg mx-auto">
+                    <LeaderboardCard />
+                </div>
+            </div>
+        </div>
+    </main>
+</Layout>

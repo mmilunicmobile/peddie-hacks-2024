@@ -2,9 +2,8 @@
 import Layout from "../layouts/Layout.astro";
 import Navbar from "../components/Navbar.astro";
 import Card from "../components/Card";
-import { map } from "astro/zod";
-
-const output = [1, 2, 3, 4, 5, 6];
+import { levels } from "../constants";
+// Flexibly map the options for leaderboards to a list of options.
 ---
 
 <Layout title="Leaderboard">
@@ -16,12 +15,12 @@ const output = [1, 2, 3, 4, 5, 6];
             </h1>
             <div class="flex flex-col m-4 space-y-8">
                 {
-                    output.map((i) => (
-                        <div class="mx-auto w-full max-w-md hover:even:rotate-1 hover:odd:-rotate-1 hover:scale-105">
-                            <a href={`/leaderboard/${i}`}>
-                                <Card>
+                    levels.map(({ name, slug, borderStyle }) => (
+                        <div class="mx-auto w-full max-w-md hover:even:rotate-1 hover:odd:-rotate-1 hover:scale-105 transition hover:brightness-105">
+                            <a href={`/leaderboard/${slug}`}>
+                                <Card borderStyle={borderStyle}>
                                     <div class="m-4 text-3xl font-extrabold text-center">
-                                        Level {i}
+                                        {name}
                                     </div>
                                 </Card>
                             </a>

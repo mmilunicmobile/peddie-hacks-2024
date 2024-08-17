@@ -1,0 +1,40 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/Navbar.astro";
+
+import { levels } from "../constants";
+import Card from "../components/Card";
+---
+
+<Layout title="Level Select">
+    <Navbar />
+    <h1 class="m-4 text-5xl font-extrabold mb-8 text-center">Levels</h1>
+    <div class="flex flex-col m-4 space-y-8">
+        {
+            levels.map(({ name, slug, borderStyle, stars }) => (
+                <div class="mx-auto w-full max-w-md hover:even:rotate-1 hover:odd:-rotate-1 hover:scale-105 transition hover:brightness-105">
+                    <a href={`/game/${slug}`}>
+                        <Card borderStyle={borderStyle}>
+                            <div class="m-4 text-3xl font-extrabold text-center">
+                                {name}
+                            </div>
+                            <div class="m-4 text-3xl font-extrabold text-center">
+                                {Array.from({ length: stars }).map(
+                                    (_, index) => (
+                                        <span
+                                            style={{
+                                                filter: "drop-shadow(0 0 #000000)",
+                                            }}
+                                        >
+                                            {slug === "endless" ? "?" : "★"}
+                                        </span>
+                                    ),
+                                )}
+                            </div>
+                        </Card>
+                    </a>
+                </div>
+            ))
+        }
+    </div>
+</Layout>

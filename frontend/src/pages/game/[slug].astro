@@ -1,0 +1,28 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import GameComponent from "../../components/game/Game.tsx";
+import Navbar from "../../components/Navbar.astro";
+import { levels } from "../../constants";
+import type { GetStaticPaths } from "astro";
+
+export const getStaticPaths = (() => {
+    return levels.map(({ slug, name, borderStyle }) => ({
+        params: { slug: slug },
+        props: { name, borderStyle },
+    }));
+}) satisfies GetStaticPaths;
+---
+
+<Layout title="Game">
+    <div class="h-full m-0 p-0 bg-red-100">
+        <Navbar />
+        <main class="h-full m-0 p-0">
+            <GameComponent
+                borderStyle={"border-red-500 bg-background"}
+                slug={Astro.params.slug.toString()}
+                name={Astro.props.name}
+                client:load
+            />
+        </main>
+    </div>
+</Layout>

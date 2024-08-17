@@ -18,7 +18,12 @@ import "../styles/base.css";
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
-	<body class="bg-background">
+	<body class="bg-background h-full">
 		<slot />
 	</body>
 </html>
+<style>
+	html {
+		height: 100%;
+	}
+</style>

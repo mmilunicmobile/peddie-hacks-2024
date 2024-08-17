@@ -43,15 +43,17 @@ export function ScoreBar(props: ScoreBarProps) {
 
 interface HealthBarProps {
     health: number
+    time: number
 }
 
 export function HealthBar(props: HealthBarProps) {
-    const { health } = props;
+    const { health, time } = props;
 
     const greenDisplayText = Math.round(health * 100) + "%";
+    const displayTime = Math.round(time * 10) / 10;
 
     return (
-        <div className="w-full h-12">
+        <div className="w-full h-12 flex">
             <Card borderStyle="border-foreground bg-background">
                 <div className="flex h-full bg-gray-200">
                     <div className="text-2xl font-bold text-black z-10 absolute left-0 right-0 top-0 bottom-0 m-auto text-center">{greenDisplayText}</div>
@@ -67,6 +69,7 @@ export function HealthBar(props: HealthBarProps) {
 
                 </div>
             </Card >
+            <div className="text-2xl font-bold text-black flex-none my-auto mx-4 min-w-28 text-right font-mono">{displayTime.toFixed(1)} s</div>
         </div >
     )
 }

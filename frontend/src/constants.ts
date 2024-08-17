@@ -45,4 +45,5 @@ export const levels = [{
     slug: "endless",
     borderStyle: "border-red-500 bg-red-100",
     stars: 5,
+    seconds: "∞",
 },];

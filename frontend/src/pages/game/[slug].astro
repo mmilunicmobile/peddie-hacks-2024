@@ -6,9 +6,9 @@ import { levels } from "../../constants";
 import type { GetStaticPaths } from "astro";
 
 export const getStaticPaths = (() => {
-    return levels.map(({ slug, name, borderStyle }) => ({
+    return levels.map(({ slug, name, borderStyle, seconds }) => ({
         params: { slug: slug },
-        props: { name, borderStyle },
+        props: { name, borderStyle, seconds },
     }));
 }) satisfies GetStaticPaths;
 ---
@@ -21,6 +21,7 @@ export const getStaticPaths = (() => {
                 borderStyle={"border-red-500 bg-background"}
                 slug={Astro.params.slug.toString()}
                 name={Astro.props.name}
+                timeAmount={Astro.props.seconds}
                 client:load
             />
         </main>

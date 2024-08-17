@@ -2,33 +2,9 @@ import React, { useState } from 'react';
 import { levels } from '../../constants.ts';
 import { useEffect } from 'react';
 
-export default function WelcomeCard({ startCallback }: { startCallback: (hard: boolean) => void }) {
-    const [timeAmount, setTimeAmount] = useState<number | string>(levels[0]?.seconds || 60);
+export default function WelcomeCard({ startCallback, slug, timeAmount }: { startCallback: (hard: boolean) => void, slug: string, timeAmount: number | string }) {
     const [isOverlayVisible, setIsOverlayVisible] = useState(true);
     const [isOverlayRendered, setIsOverlayRendered] = useState(true);
-
-    useEffect(() => {
-        const pathname = window.location.pathname;
-        let levelIndex = 0;
-
-        if (pathname.includes('/2')) {
-            levelIndex = 1;
-        } else if (pathname.includes('/3')) {
-            levelIndex = 2;
-        } else if (pathname.includes('/4')) {
-            levelIndex = 3;
-        } else if (pathname.includes('/5')) {
-            levelIndex = 4;
-        } else if (pathname.includes('/endless')) {
-            levelIndex = 5;
-        }
-
-        if (levelIndex === 5) {
-            setTimeAmount("∞");
-        } else {
-            setTimeAmount(levels[levelIndex]?.seconds || 60);
-        }
-    }, []);
 
     const handleStart = () => {
         console.log('Start');

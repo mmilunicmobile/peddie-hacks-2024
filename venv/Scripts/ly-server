@@ -1,0 +1,4 @@
+#!C:\Users\A_XX_\programming\peddie-hacks-2024\venv\Scripts\python.exe
+import sys
+from ly.server.main import main
+sys.exit(main())

@@ -72,6 +72,8 @@
                     logoutLink.addEventListener("click", (event) => {
                         event.preventDefault();
                         deleteCookie("jwt");
+                        deleteCookie("username");
+                        deleteCookie("user_id");
                         window.location.href = "/";
                     });
                 }

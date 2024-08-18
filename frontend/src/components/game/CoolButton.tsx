@@ -7,12 +7,13 @@ interface CoolButtonProps {
     onClick: () => void
     setClick: React.Dispatch<React.SetStateAction<boolean>>
     glowColor: string
+    children: React.ReactNode
 }
 
 // creates a simple button to be used for the clicking aspect of the game
 // onClick is a method to run when clicked, setClick is a value to set when space is pressed (done to mitigate closures),
 // and glowColor is the color of the button so the game can change it on clicks depending on if it was correct or not to click
-export default function CoolButton({ onClick, setClick, glowColor }: CoolButtonProps) {
+export default function CoolButton({ onClick, setClick, glowColor, children }: CoolButtonProps) {
     const [size, setSize] = useState(1);
 
     // makes the button grow and shrink suddenly
@@ -57,10 +58,10 @@ export default function CoolButton({ onClick, setClick, glowColor }: CoolButtonP
                         "transform 0.05s ease-out"
                 }}>
                     <Card borderStyle="border-foreground">
-                        <div className="w-full h-full" style={{
+                        <div className="w-full h-full flex" style={{
                             backgroundColor: glowColor,
                             transition: "background-color 0.05s ease-out",
-                        }}></div>
+                        }}><div className="m-auto text-lg">{children}</div></div>
                     </Card></button>
             </div>
         </div >

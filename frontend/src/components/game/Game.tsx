@@ -60,6 +60,7 @@ export default function GameComponent(props: GameComponentProps) {
 
     // the scores of each note in the current set (true, null, or false for eacj note depending on if it was hit or not)
     const [thisSetScores, setThisSetScores] = useState<(boolean | null)[]>([]);
+    const [thisSetTimes, setThisSetTimes] = useState<number[]>([]);
 
     // the timings of the notes in the current bar relative to time
     const [timings, setTimings] = useState<number[]>([]);
@@ -82,11 +83,15 @@ export default function GameComponent(props: GameComponentProps) {
     // the color of the button
     const [glow, setGlow] = useState("white");
 
+    // if it is the computer's turn
+    const [computerTurn, setComputerTurn] = useState("");
+
     // the sound effects
     let baseSound = useRef<HTMLAudioElement | null>(null);
     let midSound = useRef<HTMLAudioElement | null>(null);
     let chordSound = useRef<HTMLAudioElement | null>(null);
     let clapSound = useRef<HTMLAudioElement | null>(null);
+    let bellSound = useRef<HTMLAudioElement | null>(null);
 
     // a function to delay execution
     const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
@@ -108,6 +113,7 @@ export default function GameComponent(props: GameComponentProps) {
         midSound.current = new Audio('/music/mid.mp3');
         chordSound.current = new Audio('/music/chord.mp3');
         clapSound.current = new Audio('/music/clap.mp3');
+        bellSound.current = new Audio('/music/bell.mp3');
     }, []);
 
 
@@ -172,6 +178,11 @@ export default function GameComponent(props: GameComponentProps) {
     function makeClap() {
         clapSound.current!.currentTime = 0;
         clapSound.current?.play();
+    }
+
+    function makeBell() {
+        bellSound.current!.currentTime = 0;
+        bellSound.current?.play();
     }
 
     // makes a clap sound but from a human source
@@ -259,7 +270,7 @@ export default function GameComponent(props: GameComponentProps) {
         // schedules the claps
         for (let i = 0; i < beats.length; i++) {
             setTimeout(() => {
-                makeClap();
+                makeBell();
             }, timeBetweenBeats * beats[i]);
         }
     }
@@ -334,9 +345,9 @@ export default function GameComponent(props: GameComponentProps) {
 
         // if the mode is hard does not play the claps
         if (!hard) {
-            scheduleBeats(setObject.tempo, [chordSound, baseSound, chordSound, midSound, chordSound, baseSound, chordSound, midSound], setObject.rhythm);
+            scheduleBeats(setObject.tempo, [chordSound, baseSound, baseSound, baseSound, chordSound, baseSound, baseSound, baseSound], setObject.rhythm);
         } else {
-            scheduleBeats(setObject.tempo, [chordSound, baseSound, chordSound, midSound, chordSound, baseSound, chordSound, midSound], []);
+            scheduleBeats(setObject.tempo, [chordSound, baseSound, baseSound, baseSound, chordSound, baseSound, baseSound, baseSound], []);
         }
 
         //sets the image
@@ -345,7 +356,10 @@ export default function GameComponent(props: GameComponentProps) {
         //sets clap lock timing for rehythm preview
         clapLocked.current = true;
         setTimeout(() => { clapLocked.current = false }, timeBetweenBeats * 3.5);
-        await delay(timeBetweenBeats * 8);
+        setComputerTurn("Computer's turn...");
+        await delay(timeBetweenBeats * 4);
+        setComputerTurn("Your turn!");
+        await delay(timeBetweenBeats * 4);
     }
 
     // makes the button change color depending on the change in score
@@ -391,6 +405,7 @@ export default function GameComponent(props: GameComponentProps) {
             baseSound.current!.volume = 0;
             chordSound.current!.volume = 0;
             midSound.current!.volume = 0;
+            bellSound.current!.volume = 0;
         }
     }, [isFinished])
 
@@ -403,7 +418,7 @@ export default function GameComponent(props: GameComponentProps) {
                         {!isFinished ? <>
                             <WelcomeCard startCallback={(hard) => { startCallback() }} slug={levelIndex} setAmount={endless ? "Infinite" : props.setCount} /><MusicDisplay countdown={countdown} src={imageSrc} />
                             <div className="m-4 space-y-4 flex flex-col h-full">
-                                <CoolButton setClick={setKedIsDown} onClick={() => { makeClapHuman(true) }} glowColor={glow} />
+                                <CoolButton setClick={setKedIsDown} onClick={() => { makeClapHuman(true) }} glowColor={glow}>{computerTurn}</CoolButton>
                                 <div className="flex-none">
                                     {levelIndex === "endless" ? (
                                         <HealthBar health={health} time={time} />

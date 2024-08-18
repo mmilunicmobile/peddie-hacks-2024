@@ -12,10 +12,20 @@ import '../../styles/base.css';
 import Card from '../Card.jsx';
 import LeaderboardContents from '../LeaderboardContents.jsx';
 
-function getCookie(name: string) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop()?.split(';').shift();
+function getCookie(cname: string) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
 }
 
 export default function EndCard({ score, slug }: { score: string, slug: string }) {
@@ -25,22 +35,16 @@ export default function EndCard({ score, slug }: { score: string, slug: string }
 
         const userid = getCookie('user_id') || 0; // Default to 0 if not found
         const username = getCookie('username') || 'string'; // Default to 'string' if not found
+        const token = getCookie('jwt') || '';
         console.log(userid, username)
-        // Create the payload object
-        const payload = {
-            userid: userid,
-            name: username,
-            score: parseInt(score, 10) // Convert score to integer
-        };
 
         // Send the POST request
-        fetch('http://localhost:5000/postscore', {
+        fetch(`http://localhost:5000/postscore/${slug}?token=${token}&score=${score}`, {
             method: 'POST',
             mode: 'no-cors',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: JSON.stringify(payload)
         })
             .then(response => response.json())
             .then(data => {

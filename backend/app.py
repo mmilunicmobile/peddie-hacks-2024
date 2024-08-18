@@ -9,6 +9,7 @@ import random
 import os
 from auth import router as auth_router
 from routes.route import router as score_router
+from PIL import Image, ImageChops
 
 # Create FastAPI app
 app = fastapi.FastAPI()
@@ -112,6 +113,16 @@ def generateMeasure(beats: List[BeatType]) -> List[Beat]:
     for x in range(4):
         measure.append(generateNoteValues(beats[x]))
     return measure
+
+# Code to Trim the Background of an Image based on Online Method
+def trim(im):
+    background = Image.new(im.mode, im.size, im.getpixel((0,0)))
+    difference = ImageChops.difference(im, background)
+    difference = ImageChops.add(difference, difference, 2.0, -100)
+    boundingBox = difference.getbbox()
+    if boundingBox:
+        return im.crop(boundingBox)
+
     
 def generateLilyPondPNG(notes: List[Beat]):
     rhythmString = ""
@@ -138,8 +149,13 @@ def generateLilyPondPNG(notes: List[Beat]):
 
     voice = abjad.Voice(rhythmString)
     staff = abjad.Staff([voice], name="rhythmEndless", lilypond_type="RhythmicStaff")
-    png = abjad.persist.as_png(staff)
-    return png
+    # abjad.show(staff)
+    png = abjad.persist.as_png(staff, "none", resolution=300)
+    im = Image.open(png[0][0]);
+    width, height = im.size
+    im = im.crop((0, 0, width, height / 2))
+    im = trim(im)
+    return im
 
 def finiteOrEndless(level: int, sets: int) -> List[BeatType]:
     if level == 6:
@@ -178,7 +194,7 @@ async def test():
 # For some reason on windows you have to use this command even though port is defined
 # uvicorn app:app --reload --port 5000
 if __name__ == '__main__':
-    print(([generateLilyPondPNG(generateMeasure(generateBeatTypesForMeasureEndless(13)))]))
+    print(([generateLilyPondPNG(generateMeasure(generateBeatTypesForMeasureEndless(13, 0, 0)))]))
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5000) 
     

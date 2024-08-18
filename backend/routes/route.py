@@ -35,8 +35,13 @@ async def get_user(userID: int):
     return user
 
 @router.post("/postscore/{level}")
-async def post_userScore(token: str, level:int):
-    decode = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+async def post_userScore(token: str, level: int, score: float):
+    decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+    user_data = {
+        'login': decoded['login'],
+        'user_id': decoded['user_id']
+    }
+    user = User(name=user_data['login'], score=score)
     levelCollections[level].insert_one(dict(user))
     return
 

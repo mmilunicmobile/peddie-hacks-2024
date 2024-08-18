@@ -4,9 +4,9 @@ import os
 
 load_dotenv()
 
-MONGO_PASSWORD = os.getenv('MONGO_PASSWORD')
+MONGO_URL = os.getenv('MONGO_URL')
 
-client = MongoClient("mongodb+srv://newadmin:{MONGO_PASSWORD}@cluster0.ljqdw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+client = MongoClient("mongodb+srv://newadmin:IqDQW99dMffFm3se@cluster0.ljqdw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 
 db = client.leaderboard_db
 

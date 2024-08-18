@@ -20,7 +20,6 @@ levelCollections = {
 async def get_user(username: str, level: int):
     user = list_serial(levelCollections[level].find(dict({"username": username})))
     return user
-    
 
 @router.post("/postscore/{level}")
 async def post_userScore(user: User, level:int):

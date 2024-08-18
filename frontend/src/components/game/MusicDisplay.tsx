@@ -1,11 +1,16 @@
 
 import { useEffect, useState } from "react";
 
-export default function MusicDisplay() {
+interface MusicDisplayProps {
+    src?: string,
+    countdown?: string
+}
+
+export default function MusicDisplay({ src, countdown = "1" }: MusicDisplayProps) {
     return (
-        <div className="flex-none">
-            <img src="/images/testMusic.svg" className="h-32 mt-16 mx-auto" />
-        </div>
+        src ? <div className="flex-none">
+            <img src={src} className="h-32 mt-16 mx-auto" />
+        </div> : <div className="flex-none h-32 mt-16 text-center flex text-7xl font-semibold"><div className="my-auto mx-auto">{countdown}</div></div>
     )
 }
 

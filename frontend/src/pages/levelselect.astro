@@ -8,14 +8,16 @@ import Card from "../components/Card";
 
 <Layout title="Level Select">
     <Navbar />
-    <h1 class="m-4 text-5xl font-extrabold mb-8 text-center">Levels</h1>
+    <h1 class="m-4 text-5xl font-extrabold mb-8 text-center font-press-start">
+        Levels
+    </h1>
     <div class="flex flex-col m-4 space-y-8">
         {
             levels.map(({ name, slug, borderStyle, stars }) => (
                 <div class="mx-auto w-full max-w-md hover:even:rotate-1 hover:odd:-rotate-1 hover:scale-105 transition hover:brightness-105">
                     <a href={`/game/${slug}`}>
                         <Card borderStyle={borderStyle}>
-                            <div class="m-4 text-3xl font-extrabold text-center">
+                            <div class="m-4 text-3xl font-extrabold text-center font-press-start">
                                 {name}
                             </div>
                             <div class="m-4 text-3xl font-extrabold text-center">
@@ -37,4 +39,5 @@ import Card from "../components/Card";
             ))
         }
     </div>
+    <div class="h-8"></div>
 </Layout>

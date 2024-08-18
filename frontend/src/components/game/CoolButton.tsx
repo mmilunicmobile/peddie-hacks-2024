@@ -1,16 +1,23 @@
 import Card from "../Card";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 
 interface CoolButtonProps {
     onClick: () => void
+    setClick: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export default function CoolButton({ onClick }: CoolButtonProps) {
+export default function CoolButton({ onClick, setClick }: CoolButtonProps) {
     const [size, setSize] = useState(1);
 
     const mouseDown = () => {
         onClick();
+        setSize(size + .1);
+        setTimeout(() => { setSize(size) }, 50);
+    };
+
+    const keyDown = () => {
+        setClick(true);
         setSize(size + .1);
         setTimeout(() => { setSize(size) }, 50);
     }
@@ -18,13 +25,13 @@ export default function CoolButton({ onClick }: CoolButtonProps) {
     useEffect(() => {
         document.addEventListener("keydown", (event) => {
             if (event.code === "Space") {
-                mouseDown();
+                keyDown();
             }
         })
         return () => {
             document.removeEventListener("keydown", (event) => {
                 if (event.code === "Space") {
-                    mouseDown();
+                    keyDown();
                 }
             })
         }

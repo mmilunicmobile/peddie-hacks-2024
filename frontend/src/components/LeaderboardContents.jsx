@@ -1,7 +1,7 @@
 import Card from "./Card"
 import LeaderboardSlot from "./LeaderboardSlot"
 
-export default function LeaderboardContents({ slug, borderStyle }) {
+export default function LeaderboardContents({ length, slug, borderStyle }) {
     const people = [
         { place: 1, name: 'Bob', score: "100 points" },
         { place: 2, name: 'Alice', score: "50 points" },

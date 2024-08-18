@@ -1,49 +1,90 @@
----
-let isLoggedIn = false;
----
-
 <nav
     class="bg-black bg-opacity-100 backdrop-blur p-5 flex justify-between items-center"
 >
-    <div class="text-white font-bold text-2xl ml-4 md:ml-8 lg:ml-16">
-        <a href="/">Placeholder name</a>
+    <div
+        class="text-white font-press-start font-bold text-2xl ml-4 md:ml-8 lg:ml-16 rainbow-text bg-white p-2 border-red-500 border-2"
+    >
+        <a href="/">Retro Rhythm</a>
     </div>
     <ul class="flex space-x-4 md:space-x-6 lg:space-x-8 mr-4 md:mr-8 lg:mr-16">
         <li>
-            <a href="/levelselect" class="text-white hover:text-gray-400">
+            <a
+                href="/levelselect"
+                class="text-white hover:text-gray-400 font-press-start"
+            >
                 Play
             </a>
         </li>
         <li>
-            <a href="/leaderboard" class="text-white hover:text-gray-400">
+            <a
+                href="/leaderboard"
+                class="text-white hover:text-gray-400 font-press-start"
+            >
                 Leaderboard
             </a>
         </li>
-        <li>
-            <a href="/profile" class="text-white hover:text-gray-400">
-                Profile
+        <li id="auth-link">
+            <a
+                href="http://localhost:5000/login"
+                class="text-white border border-white px-4 py-2 hover:bg-white hover:text-black transition font-press-start"
+            >
+                Login
             </a>
         </li>
-        {
-            isLoggedIn ? (
-                <li>
-                    <a
-                        href="/logout"
-                        class="text-white border border-white rounded-full px-4 py-2 hover:bg-white hover:text-black transition"
-                    >
-                        Logout
-                    </a>
-                </li>
-            ) : (
-                <li>
-                    <a
-                        href="/login"
-                        class="text-white border border-white rounded-full px-4 py-2 hover:bg-white hover:text-black transition"
-                    >
-                        Login
-                    </a>
-                </li>
-            )
-        }
     </ul>
 </nav>
+
+<script>
+    // Function to get a cookie by name
+    function getCookie(name: string) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) {
+            return parts.pop()?.split(";").shift() || null;
+        }
+        return null;
+    }
+
+    // Function to delete a cookie by name
+    function deleteCookie(name: string) {
+        document.cookie = name + "=; Max-Age=0; path=/";
+    }
+
+    // Function to check for JWT token in cookies
+    function checkAuth() {
+        const token = getCookie("jwt");
+        return token !== null && token !== undefined && token !== "";
+    }
+
+    // Update the auth link based on the isLoggedIn status
+    function updateAuthLink() {
+        const isLoggedIn = checkAuth();
+        const authLink = document.getElementById("auth-link");
+        if (authLink) {
+            if (isLoggedIn) {
+                authLink.innerHTML = `
+                    <a href="#" id="logout-link" class="text-white border border-white px-4 py-2 hover:bg-white hover:text-black transition font-press-start">
+                        Logout
+                    </a>
+                `;
+                const logoutLink = document.getElementById("logout-link");
+                if (logoutLink) {
+                    logoutLink.addEventListener("click", (event) => {
+                        event.preventDefault();
+                        deleteCookie("jwt");
+                        window.location.href = "/";
+                    });
+                }
+            } else {
+                authLink.innerHTML = `
+                    <a href="http://localhost:5000/login" class="text-white border border-white px-4 py-2 hover:bg-white hover:text-black transition font-press-start">
+                        Login
+                    </a>
+                `;
+            }
+        }
+    }
+
+    // Run updateAuthLink on page load
+    document.addEventListener("DOMContentLoaded", updateAuthLink);
+</script>

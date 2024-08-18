@@ -9,7 +9,10 @@ export default {
 				primary: "#2f27ce",
 				secondary: "#dedcff",
 				accent: "#433bff",
-			}
+			},
+			fontFamily: {
+				'press-start': ['"Press Start 2P"', 'sans-serif'],
+			},
 		},
 	},
 	plugins: [],

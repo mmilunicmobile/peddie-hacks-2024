@@ -6,22 +6,26 @@ import { levels } from "../../constants";
 import type { GetStaticPaths } from "astro";
 
 export const getStaticPaths = (() => {
-    return levels.map(({ slug, name, borderStyle, seconds }) => ({
-        params: { slug: slug },
-        props: { name, borderStyle, seconds },
-    }));
+    return levels.map(
+        ({ slug, name, borderStyle, seconds, displaySeconds, setCount }) => ({
+            params: { slug: slug },
+            props: { name, borderStyle, seconds, displaySeconds, setCount },
+        }),
+    );
 }) satisfies GetStaticPaths;
 ---
 
 <Layout title="Game">
-    <div class="h-full m-0 p-0 bg-red-100">
+    <div class={`h-full m-0 p-0 ${Astro.props.borderStyle}`}>
         <Navbar />
         <main class="h-full m-0 p-0">
             <GameComponent
-                borderStyle={"border-red-500 bg-background"}
+                borderStyle={Astro.props.borderStyle}
                 slug={Astro.params.slug.toString()}
                 name={Astro.props.name}
                 timeAmount={Astro.props.seconds}
+                timeDisplay={Astro.props.displaySeconds}
+                setCount={Astro.props.setCount}
                 client:load
             />
         </main>

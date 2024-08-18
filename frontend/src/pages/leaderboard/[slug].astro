@@ -21,12 +21,13 @@ export const getStaticPaths = (() => {
     <Navbar />
     <main>
         <div class="text-center">
-            <h1 class="m-8 text-3xl font-extrabold">
+            <h1 class="m-8 text-3xl font-extrabold font-press-start">
                 {name} Leaderboard
             </h1>
             <div class="m-4">
-                <div class="max-w-lg mx-auto">
+                <div class="max-w-lg mx-auto font-press-start">
                     <LeaderboardContents
+                        length={10}
                         slug={slug}
                         borderStyle={borderStyle}
                     />

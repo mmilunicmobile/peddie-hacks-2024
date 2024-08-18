@@ -9,17 +9,19 @@ import { levels } from "../constants";
 <Layout title="Leaderboard">
     <main>
         <Navbar />
-        <div class="">
-            <h1 class="m-4 text-5xl font-extrabold mb-8 text-center">
+        <div class="mb-8">
+            <h1
+                class="m-4 text-5xl font-extrabold mb-8 text-center font-press-start"
+            >
                 Leaderboards
             </h1>
-            <div class="flex flex-col m-4 space-y-8">
+            <div class="flex flex-col mx-4 mt-4 space-y-8">
                 {
                     levels.map(({ name, slug, borderStyle }) => (
                         <div class="mx-auto w-full max-w-md hover:even:rotate-1 hover:odd:-rotate-1 hover:scale-105 transition hover:brightness-105">
                             <a href={`/leaderboard/${slug}`}>
                                 <Card borderStyle={borderStyle}>
-                                    <div class="m-4 text-3xl font-extrabold text-center">
+                                    <div class="m-4 text-3xl font-extrabold text-center font-press-start">
                                         {name}
                                     </div>
                                 </Card>
@@ -29,5 +31,6 @@ import { levels } from "../constants";
                 }
             </div>
         </div>
+        <div class="h-8"></div>
     </main>
 </Layout>

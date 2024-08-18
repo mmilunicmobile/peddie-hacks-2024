@@ -59,6 +59,7 @@ def callback(request: Request):
     # Generate JWT
     payload = {
         'login': user_info['login'],
+        'user_id': user_info['id'],
         'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
     }
     token = jwt.encode(payload, JWT_SECRET, algorithm='HS256')

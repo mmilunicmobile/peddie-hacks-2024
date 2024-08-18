@@ -6,6 +6,7 @@ from enum import Enum
 from typing import List
 import abjad
 import random
+import os
 from auth import router as auth_router
 from routes.route import router as score_router
 
@@ -28,8 +29,7 @@ class Beat():
         self.beatType = beatVariant
         self.noteValues = noteList
 
-@app.get("/api/set/level/{level}?number={setNumber}")
-def generateBeatTypesForMeasureFinite(level: int) -> List[BeatType]:
+def generateBeatTypesForMeasureFinite(level: str, setNumber: int) -> List[BeatType]:
     beatTypeList: List[BeatType] = []
     if level == 1:
         for x in range(4):
@@ -69,8 +69,7 @@ def generateBeatTypesForMeasureFinite(level: int) -> List[BeatType]:
 endlessQuarterFOC = 3.0
 endlessEighthFOC = 30.0
 
-@app.get("/api/set/level/{level}?number={setNumber}&time={time}")
-def generateBeatTypesForMeasureEndless(sets: int) -> List[BeatType]:
+def generateBeatTypesForMeasureEndless(sets: str, setNumber: int, time: float) -> List[BeatType]:
     beatTypeList: List[BeatType] = []
     for x in range(4):
         randFloat = random.random()
@@ -162,8 +161,8 @@ def createFrontendList(beats: List[Beat]) -> List[float]:
             currentTime += beatLength
     return timingsList
 
-@app.get("/api/set/level/{level}?number={setNumber}&time={time}")
-def getFrontendList(level: int, setNumber: int) -> List[float]:
+@app.get("/api/set/level/{level}/")
+def getFrontendList(level: int, setNumber: int, time: float) -> List[float]:
     return dict(generateTempo(level, setNumber), createFrontendList(generateMeasure(finiteOrEndless(level, setNumber))), FileResponse(generateLilyPondPNG))
 
 # Define default root route

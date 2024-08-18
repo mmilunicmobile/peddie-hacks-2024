@@ -25,7 +25,7 @@ export default function EndCard({ score, slug }: { score: string, slug: string }
 
         const userid = getCookie('user_id') || 0; // Default to 0 if not found
         const username = getCookie('username') || 'string'; // Default to 'string' if not found
-        console.log(userid, username);
+        console.log(userid, username)
         // Create the payload object
         const payload = {
             userid: userid,
@@ -36,8 +36,9 @@ export default function EndCard({ score, slug }: { score: string, slug: string }
         // Send the POST request
         fetch('http://localhost:5000/postscore', {
             method: 'POST',
+            mode: 'no-cors',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: JSON.stringify(payload)
         })

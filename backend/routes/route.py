@@ -4,6 +4,7 @@ from models.user import User
 from schemas import list_serial
 from bson import ObjectId
 from enum import Enum
+import jwt
 
 router = APIRouter()
 
@@ -19,11 +20,25 @@ levelCollections = {
 @router.get("/getuser/{level}/{username}")
 async def get_user(username: str, level: int):
     user = list_serial(levelCollections[level].find(dict({"username": username})))
+from dotenv import load_dotenv
+import os
+
+router = APIRouter()
+
+load_dotenv()
+
+JWT_SECRET = os.getenv('JWT_SECRET', 'your_jwt_secret')
+
+@router.get("/getuser/{userID}")
+async def get_user(userID: int):
+    user = list_serial(levelCollections[level].find(dict({"userid": userID})))
     return user
 
 @router.post("/postscore/{level}")
-async def post_userScore(user: User, level:int):
+async def post_userScore(token: str, level:int):
+    decode = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
     levelCollections[level].insert_one(dict(user))
+    return
 
 @router.get("/leaderboard/{level}/{username}")
 async def get_leaderboard(level: int, username:str):

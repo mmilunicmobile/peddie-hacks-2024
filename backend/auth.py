@@ -53,7 +53,6 @@ def callback(request: Request):
     user_info_url = 'https://api.github.com/user'
     user_info_response = requests.get(user_info_url, headers={'Authorization': f'token {access_token}'})
     user_info = user_info_response.json()
-    print(user_info)
     user_id = user_info.get('id')
     username = user_info.get('login')
 

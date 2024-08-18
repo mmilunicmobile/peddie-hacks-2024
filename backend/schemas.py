@@ -8,5 +8,9 @@ def individual_serial(user) -> dict:
         "score": user["score"]
     }
 
-def list_serial(users) -> List[dict]:
-    return [individual_serial(user) for user in users]
+def list_serial(items):
+    serialized_items = []
+    for item in items:
+        item['_id'] = str(item['_id'])
+        serialized_items.append(item)
+    return serialized_items

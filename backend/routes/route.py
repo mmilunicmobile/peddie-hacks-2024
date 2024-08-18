@@ -22,9 +22,8 @@ async def get_user(username: str, level: int):
     return user
     
 
-@router.post("/postscore/{level}?score={setScore}")
+@router.post("/postscore/{level}")
 async def post_userScore(user: User, level:int):
-    
     levelCollections[level].insert_one(dict(user))
 
 @router.get("/leaderboard/{level}/{username}")

@@ -45,6 +45,8 @@ export default function GameComponent(props: GameComponentProps) {
     const [kedIsDown, setKedIsDown] = useState(false);
     const imageRefs = useRef<(HTMLImageElement)[]>([]);
 
+    const [glow, setGlow] = useState("white");
+
     let baseSound = useRef<HTMLAudioElement | null>(null);
     let midSound = useRef<HTMLAudioElement | null>(null);
     let chordSound = useRef<HTMLAudioElement | null>(null);
@@ -243,6 +245,7 @@ export default function GameComponent(props: GameComponentProps) {
                             const negDifNorm = 1 / currentSet.rhythm.length / props.setCount
                             handleRedProportionChange(negDifNorm);
                             setHealth((health) => Math.max(health - 1 * 0.2, 0));
+                            displayCoolChange(-negDifNorm);
                         },
                         ((60 / currentSet.tempo * (currentSet.rhythm[i] + 4)) + timingTolerance) * 1000);
                 }
@@ -275,7 +278,14 @@ export default function GameComponent(props: GameComponentProps) {
 
 
     const displayCoolChange = (change: number) => {
-        console.log(change);
+        console.log("Cool change: " + change);
+        if (change > 0) {
+            setGlow("green");
+            setTimeout(() => { setGlow("white") }, 100);
+        } else if (change < 0) {
+            setGlow("red");
+            setTimeout(() => { setGlow("white") }, 100);
+        }
     }
 
     const handleGreenProportionChange = (newProportion: number) => {
@@ -316,7 +326,7 @@ export default function GameComponent(props: GameComponentProps) {
                         {!isFinished ? <>
                             <WelcomeCard startCallback={(hard) => { startCallback() }} slug={levelIndex} setAmount={endless ? "Infinite" : props.setCount} /><MusicDisplay countdown={countdown} src={imageSrc} />
                             <div className="m-4 space-y-4 flex flex-col h-full">
-                                <CoolButton setClick={setKedIsDown} onClick={() => { makeClapHuman(true) }} />
+                                <CoolButton setClick={setKedIsDown} onClick={() => { makeClapHuman(true) }} glowColor={glow} />
                                 <div className="flex-none">
                                     {levelIndex === "endless" ? (
                                         <HealthBar health={health} time={time} />

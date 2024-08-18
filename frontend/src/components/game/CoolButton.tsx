@@ -5,9 +5,10 @@ import { useCallback, useEffect, useState } from "react";
 interface CoolButtonProps {
     onClick: () => void
     setClick: React.Dispatch<React.SetStateAction<boolean>>
+    glowColor: string
 }
 
-export default function CoolButton({ onClick, setClick }: CoolButtonProps) {
+export default function CoolButton({ onClick, setClick, glowColor }: CoolButtonProps) {
     const [size, setSize] = useState(1);
 
     const mouseDown = () => {
@@ -43,11 +44,15 @@ export default function CoolButton({ onClick, setClick }: CoolButtonProps) {
             <div className="w-full h-full py-16">
                 <button className="w-full h-full" onMouseDown={mouseDown} style={{
                     transform: `scale(${size})`,
+
                     transition:
                         "transform 0.05s ease-out"
                 }}>
-                    <Card borderStyle="border-foreground bg-background">
-                        <div></div>
+                    <Card borderStyle="border-foreground">
+                        <div className="w-full h-full" style={{
+                            backgroundColor: glowColor,
+                            transition: "background-color 0.05s ease-out",
+                        }}></div>
                     </Card></button>
             </div>
         </div >

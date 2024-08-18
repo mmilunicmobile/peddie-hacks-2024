@@ -15,7 +15,7 @@ export const getStaticPaths = (() => {
 }) satisfies GetStaticPaths;
 ---
 
-<Layout title="Game">
+<Layout title={`Play ${Astro.props.name}`}>
     <div class={`h-full m-0 p-0 ${Astro.props.borderStyle}`}>
         <Navbar />
         <main class="h-full m-0 p-0">

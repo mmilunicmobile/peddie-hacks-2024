@@ -17,7 +17,7 @@ export default function LeaderboardContents({ length, slug, borderStyle }) {
         } else {
             tempSlug = slug
         }
-        fetch(`http://localhost:5000/leaderboard/${tempSlug}/username`)
+        fetch(`https://api.letssign.xyz/leaderboard/${tempSlug}/username`)
             .then(response => response.json())
             .then(data => {
                 setPeople(data)

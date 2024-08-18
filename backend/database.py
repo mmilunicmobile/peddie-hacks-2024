@@ -1,17 +1,16 @@
-import sqlalchemy
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
+from pymongo.mongo_client import MongoClient
+import os
 
-dbPeddieHacksPA
-wQovH0MuOQO14eQU
-SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
-# SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
+load_dotenv()
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+MONGO_URL = os.getenv('MONGO_URL')
 
-Base = declarative_base()
+client = MongoClient("mongodb+srv://admin:IqDQW99dMffFm3se@cluster0.ljqdw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 
-engine = create_engine("mongodb:///?Server=MyServer&Port=27017&Database=test&User=dbPeddieHacksPA&Password=wQovH0MuOQO14eQU")
+db = client.leaderboard_db
+
+collection_name = db["leaderboard_collection"]
+
+# Probably not the best idea to hardcode database credentials. I would recommend using something like .env (esp since I've alr used it in the auth
+# section) nevermind, I just did it for you

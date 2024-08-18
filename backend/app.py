@@ -1,17 +1,19 @@
 # Import FastAPI for backend server communication
 import fastapi
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from enum import Enum
 from typing import List
 import abjad
 import random
-import sqlalchemy
 from auth import router as auth_router
+from routes.route import router as score_router
 
 # Create FastAPI app
 app = fastapi.FastAPI()
 
 app.include_router(auth_router)
+app.include_router(score_router)
 
 class BeatType(Enum):
     QUARTER = ("quarter", 1)
@@ -25,6 +27,44 @@ class Beat():
     def __init__(self, beatVariant, noteList: List[bool]):
         self.beatType = beatVariant
         self.noteValues = noteList
+
+@app.get("/api/set/level/{level}?number={setNumber}")
+def generateBeatTypesForMeasureFinite(level: int) -> List[BeatType]:
+    beatTypeList: List[BeatType] = []
+    if level == 1:
+        for x in range(4):
+            beatTypeList.append(BeatType.QUARTER)
+    elif level == 2:
+        for x in range(4):
+            randFloat = random.random()
+            if(randFloat <= 0.15):
+                beatTypeList.append(BeatType.QUARTER)
+            else:
+                beatTypeList.append(BeatType.EIGHTH)
+    elif level == 3:
+        for x in range(4):
+            randFloat = random.random()
+            if(randFloat <= 0.10):
+                beatTypeList.append(BeatType.QUARTER)
+            elif(randFloat > 0.10 & randFloat <= 0.20):
+                beatTypeList.append(BeatType.EIGHTH)
+            else:
+                beatTypeList.append(BeatType.SIXTEENTH)
+    elif level == 4:
+        for x in range(4):
+            beatTypeList.append(BeatType.TRIPLET)
+    elif level == 5:
+        for x in range(4):
+            randFloat = random.random()
+            if(randFloat <= 0.25):
+                beatTypeList.append(BeatType.QUARTER)
+            elif(randFloat <= 0.50 & randFloat > 0.25):
+                beatTypeList.append(BeatType.EIGHTH)
+            elif(randFloat <= 0.75 & randFloat > 0.50):
+                beatTypeList.append(BeatType.SIXTEENTH)
+            elif(randFloat > 0.75):
+                beatTypeList.append(BeatType.TRIPLET)
+    return beatTypeList
 
 endlessQuarterFOC = 3.0
 endlessEighthFOC = 30.0
@@ -99,8 +139,14 @@ def generateLilyPondPNG(notes: List[Beat]):
 
     voice = abjad.Voice(rhythmString)
     staff = abjad.Staff([voice], name="rhythmEndless", lilypond_type="RhythmicStaff")
-    abjad.persist.as_png(staff)
-    return rhythmString
+    png = abjad.persist.as_png(staff)
+    return png
+
+def finiteOrEndless(level: int, sets: int) -> List[BeatType]:
+    if level == 6:
+        return generateBeatTypesForMeasureEndless(sets)
+    else:
+        return generateBeatTypesForMeasureFinite(level)
 
 # takes a list of beats and turns it into the frontend format
 def createFrontendList(beats: List[Beat]) -> List[float]:
@@ -117,8 +163,8 @@ def createFrontendList(beats: List[Beat]) -> List[float]:
     return timingsList
 
 @app.get("/api/set/level/{level}?number={setNumber}&time={time}")
-def getFrontendList(setNumber: int) -> List[float]:
-    return createFrontendList(generateMeasure(generateBeatTypesForMeasureEndless(setNumber)))
+def getFrontendList(level: int, setNumber: int) -> List[float]:
+    return dict(generateTempo(level, setNumber), createFrontendList(generateMeasure(finiteOrEndless(level, setNumber))), FileResponse(generateLilyPondPNG))
 
 # Define default root route
 @app.get("/")

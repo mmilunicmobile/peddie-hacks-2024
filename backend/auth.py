@@ -65,7 +65,7 @@ def callback(request: Request):
     token = jwt.encode(payload, JWT_SECRET, algorithm='HS256')
 
     # Set JWT in cookie
-    response = RedirectResponse(url='https://www.letssign.xyz')
+    response = RedirectResponse(url='https://letssign.xyz')
     response.set_cookie(key='jwt', value=token, httponly=False, secure=False)
     response.set_cookie(key='user_id', value=str(user_id), httponly=False, secure=False)
     response.set_cookie(key='username', value=str(username), httponly=False, secure=False)

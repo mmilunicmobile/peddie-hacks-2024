@@ -47,7 +47,7 @@
 
     // Function to delete a cookie by name
     function deleteCookie(name: string) {
-        document.cookie = name + "=; Max-Age=0; path=/";
+        document.cookie = `${name}=; Max-Age=-99999999; domain=.letssign.xyz; path=/`;
     }
 
     // Function to check for JWT token in cookies

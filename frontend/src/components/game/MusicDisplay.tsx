@@ -1,12 +1,11 @@
-
-import { useEffect, useState } from "react";
-
 interface MusicDisplayProps {
     src?: string,
     countdown?: string
 }
 
+// displays the music in the game
 export default function MusicDisplay({ src, countdown = "1" }: MusicDisplayProps) {
+    // displays either the music or a countdown
     return (
         src ? <div className="flex-none">
             <img src={src} className="h-32 mt-16 mx-auto" />

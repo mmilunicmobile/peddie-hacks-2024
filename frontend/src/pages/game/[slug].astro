@@ -5,6 +5,8 @@ import Navbar from "../../components/Navbar.astro";
 import { levels } from "../../constants";
 import type { GetStaticPaths } from "astro";
 
+// Maps all the levels in the levels constants file to different routes.
+// Additionally, passes along information to the game component.
 export const getStaticPaths = (() => {
     return levels.map(
         ({ slug, name, borderStyle, seconds, displaySeconds, setCount }) => ({

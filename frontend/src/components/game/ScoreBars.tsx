@@ -7,13 +7,16 @@ interface ScoreBarProps {
     redProportion: number
 }
 
+// creates the default scoring bar
 export function ScoreBar(props: ScoreBarProps) {
+    // gets the green and red portions of the score
     const { greenProportion, redProportion } = props;
 
+    // finds what text to display for the green and red portions
     const greenDisplayText = Math.round(greenProportion * 100) + "%";
-
     const redDisplayText = 100 - Math.round((1 - redProportion) * 100) + "%";
 
+    // creates the score bar
     return (
         <div className="w-full h-12">
             <Card borderStyle="border-foreground bg-background">
@@ -46,12 +49,15 @@ interface HealthBarProps {
     time: number
 }
 
+// creates the scoring bar used in endless mode
 export function HealthBar(props: HealthBarProps) {
     const { health, time } = props;
 
+    // sets the width to be the health of the player and sets the percent of the bar to be the health
     const greenDisplayText = Math.round(health * 100) + "%";
     const displayTime = Math.round(time * 10) / 10;
 
+    // basically just a div that makes the bar look like a health bar
     return (
         <div className="w-full h-12 flex">
             <Card borderStyle="border-foreground bg-background">

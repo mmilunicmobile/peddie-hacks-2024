@@ -1,3 +1,4 @@
+// A simple slot in the leaderboard
 export default function LeaderboardSlot({ place, name, score }) {
     return (
         <div className="flex m-4 space-x-4">

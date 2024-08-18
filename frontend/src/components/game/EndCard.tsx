@@ -1,17 +1,10 @@
-/*
-Your score was: {score}
-
-leaderboard
-
-Click here to play again
-*/
-
 import React, { useState, useEffect } from 'react';
 import { levels } from '../../constants.ts';
 import '../../styles/base.css';
 import Card from '../Card.jsx';
 import LeaderboardContents from '../LeaderboardContents.jsx';
 
+// Get the cookie
 function getCookie(cname: string) {
     let name = cname + "=";
     let decodedCookie = decodeURIComponent(document.cookie);
@@ -30,14 +23,18 @@ function getCookie(cname: string) {
 
 export default function EndCard({ score, slug }: { score: number, slug: string }) {
 
+    // Send the POST request to the backend to send the score of the user
+    // Is filtered out on the backend if the user has no account logged in
     useEffect(() => {
         console.log('EndCard component rendered');
 
+        // gets cookies
         const userid = getCookie('user_id') || 0; // Default to 0 if not found
         const username = getCookie('username') || 'string'; // Default to 'string' if not found
         const token = getCookie('jwt') || '';
         console.log(userid, username)
 
+        // If the mode is "endless" use id of 6 instead. This is due to a backend limitation and it is easier to fix here.
         let tempSlug = slug
         if (slug === "endless") {
             tempSlug = "6"
@@ -60,11 +57,7 @@ export default function EndCard({ score, slug }: { score: number, slug: string }
             });
     }, []);
 
-    const handleReload = () => {
-        console.log('Button clicked, reloading');
-        window.location.reload();
-    };
-
+    // renders the card
     return (
         <div className="flex justify-center items-center h-screen bg-gray-100">
             <div className="w-full h-full flex flex-col justify-center bg-white p-8 shadow-lg bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">

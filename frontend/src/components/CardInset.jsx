@@ -1,3 +1,4 @@
+// Creates a card that instead appears to be going into the page. 
 export default function CardInset({ children, borderStyle = "bg-secondary border-primary" }) {
     return (
         <div className="w-full h-full">

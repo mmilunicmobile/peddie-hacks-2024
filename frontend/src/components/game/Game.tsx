@@ -19,39 +19,76 @@ interface GameComponentProps {
 
 export default function GameComponent(props: GameComponentProps) {
 
+    // gets the level index
     const levelIndex = props.slug;
 
+    // gets the border style for the card
     const borderStyle = props.borderStyle;
 
+    // creates the states for the scoring
     let [greenProportion, setGreenProportion] = useState(0.0);
     let [redProportion, setRedProportion] = useState(0.0);
     let [health, setHealth] = useState(1.0);
 
+    // creates the states for the time
     let [time, setTime] = useState(0.0);
+
+    // creates the states for the difficulty (to be integrated in a future version)
     const [hard, setHard] = useState(false);
+
+    // creates the states for the countdown and image (what to show in the image display)
     const [countdown, setCountdown] = useState("");
     const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
+
+    // if the game is in endless mode makes a boolean for that
     const endless = props.slug === "endless";
+
+    // a ref for wether the user should be able to clap at the moment
     const clapLocked = useRef(true);
+
+    // which set the user is on
     const [setNumber, setSetNumber] = useState(-1);
+
+    // the object which contains all the data to display the next bar
     const [nextSet, setNextSet] = useState<SetObject | null>(null);
+
+    // the object which contains all the data to display the current bar
     const [currentSet, setCurrentSet] = useState<SetObject | null>(null);
+
+    // if the game should end
     const [isFinished, setIsFinished] = useState(false);
+
+    // the scores of each note in the current set (true, null, or false for eacj note depending on if it was hit or not)
     const [thisSetScores, setThisSetScores] = useState<(boolean | null)[]>([]);
+
+    // the timings of the notes in the current bar relative to time
     const [timings, setTimings] = useState<number[]>([]);
+
+    // the current tempo
     const [componentTempo, setComponentTempo] = useState(60);
+
+    // a bunch of ids to be able to kill the note not played timeout
     const [timingKillers, setTimingKillers] = useState<number[]>([]);
+
+    // a ref to kill the timer when the round ends
     const [timeKill, setTimeKill] = useState(0);
+
+    // a ref to wether a key is down or not (passed to button)
     const [kedIsDown, setKedIsDown] = useState(false);
+
+    // keeps preloaded images in memory so they are not unloaded
     const imageRefs = useRef<(HTMLImageElement)[]>([]);
 
+    // the color of the button
     const [glow, setGlow] = useState("white");
 
+    // the sound effects
     let baseSound = useRef<HTMLAudioElement | null>(null);
     let midSound = useRef<HTMLAudioElement | null>(null);
     let chordSound = useRef<HTMLAudioElement | null>(null);
     let clapSound = useRef<HTMLAudioElement | null>(null);
 
+    // a function to delay execution
     const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
     useEffect(() => {
@@ -64,6 +101,8 @@ export default function GameComponent(props: GameComponentProps) {
         }
     }, []);
 
+
+    // loads the sounds
     useEffect(() => {
         baseSound.current = new Audio('/music/base.mp3');
         midSound.current = new Audio('/music/mid.mp3');
@@ -72,6 +111,7 @@ export default function GameComponent(props: GameComponentProps) {
     }, []);
 
 
+    // starts the game
     const startCallback = async () => {
         await delay(300);
         requestNextSet(undefined).then((nextSet) => {
@@ -105,86 +145,105 @@ export default function GameComponent(props: GameComponentProps) {
         }));
         const json = await result.json();
         console.log(json);
-        const backupJson = {
-            tempo: 60,
-            rhythm: [0, 0.25, 0.5, 0.75,
-                1, 1.25, 1.5, 1.75, 2.00,
-                2.25, 2.5, 2.75, 3,
-                3.25, 3.5, 3.75],
-            src: "/images/testMusic.svg"
-        }
+
+        // example of json schema
+        // {
+        //     tempo: 60,
+        //     rhythm: [0, 0.25, 0.5, 0.75,
+        //         1, 1.25, 1.5, 1.75, 2.00,
+        //         2.25, 2.5, 2.75, 3,
+        //         3.25, 3.5, 3.75],
+        //     src: "/images/testMusic.svg"
+        // }
         json.src = backendURL + "/api/set/image/?" + new URLSearchParams({
             q: json.src
         });
+
+        // preloads the image
         var img = new Image();
         img.src = json.src;
         imageRefs.current.push(img);
         console.log(setNumber + 1, tempo ? time + (60 / tempo * 8) : time)
+
         return json;
     };
 
+    // makes a clap sound
     function makeClap() {
         clapSound.current!.currentTime = 0;
         clapSound.current?.play();
     }
 
+    // makes a clap sound but from a human source
     function makeClapHuman(sound = true) {
         if (!clapLocked.current) {
             if (sound) {
                 makeClap();
             }
             console.log("clap");
+
+            // calculates which beat was closest
             const timingDiffs = timings.map((t) => {
                 return Math.abs(time - t)
             });
             console.log(timingDiffs);
             const min = Math.min(...timingDiffs);
             const index = timingDiffs.indexOf(min);
+
+            // updates the score based on that information
             console.log(timingDiffs)
             console.log(index, min);
             console.log(thisSetScores);
             clearTimeout(timingKillers[index]);
+            // includes wether or not it was within tolerance
             updateScore(index, min < timingTolerance)
         }
     }
 
+
+    // updates the score
     function updateScore(index: number, score: boolean | null) {
         setThisSetScores((inArray) => {
             const dupeArray = inArray.slice();
             dupeArray[index] = score;
             let posDif = 0;
             let negDif = 0;
+            // if the note was unscored, scores it based on timing
             if (thisSetScores[index] === null) {
                 if (score === true) {
                     posDif = 1;
                 } else if (score === false) {
                     negDif = 1;
                 }
+                // if the note was scored, its a double click so it invalidates it
             } else if (thisSetScores[index] === true) {
                 posDif = -1;
                 negDif = 1;
                 dupeArray[index] = false;
             }
 
+            // calculates the difference in score
             const posDifNorm = (posDif) / thisSetScores.length / props.setCount
             const negDifNorm = (negDif) / thisSetScores.length / props.setCount
 
+            // updates the health
             setHealth(Math.max(health - negDif * 0.2, 0));
             handleGreenProportionChange(posDifNorm);
             handleRedProportionChange(negDifNorm);
             displayCoolChange(posDifNorm - negDifNorm);
+            //updates the note scores
             return dupeArray;
         });
 
 
     }
 
-
+    // schedules beats based on the tempo, the beat types, and what times there should be claps
     function scheduleBeats(tempo: number, counts: React.MutableRefObject<HTMLAudioElement | null>[], beats: number[]) {
         const timeBetweenBeats = (60 / tempo) * 1000;
         const beatLength = 0.5 * timeBetweenBeats;
 
-        [chordSound, baseSound, chordSound, midSound, chordSound, baseSound, chordSound, midSound]
+        // schedules the counts
         for (let i = 0; i < counts.length; i++) {
             setTimeout(() => {
                 counts[i].current?.play();
@@ -196,6 +255,8 @@ export default function GameComponent(props: GameComponentProps) {
                 }
             }, timeBetweenBeats * i + beatLength);
         }
+
+        // schedules the claps
         for (let i = 0; i < beats.length; i++) {
             setTimeout(() => {
                 makeClap();
@@ -203,6 +264,7 @@ export default function GameComponent(props: GameComponentProps) {
         }
     }
 
+    // keeps track of if the user has died in endless mode
     useEffect(() => {
         if (health <= 0.01 && endless) {
             clearInterval(timeKill);
@@ -210,7 +272,7 @@ export default function GameComponent(props: GameComponentProps) {
         }
     }, [health])
 
-
+    // sets up the next set when the number changes
     useEffect(() => {
         (async () => {
             if (setNumber === -1) {
@@ -232,6 +294,7 @@ export default function GameComponent(props: GameComponentProps) {
     }, [setNumber])
 
 
+    // when the actual set content changes, it fills out all the proper info for it ands schedules the beats
     useEffect(() => {
         (async () => {
             if (currentSet) {
@@ -263,20 +326,29 @@ export default function GameComponent(props: GameComponentProps) {
         rhythm: number[],
         tempo: number,
     }
+
+    // runs a set
     async function runSet(setObject: SetObject) {
+        // calculates the time between beats
         const timeBetweenBeats = (60 / setObject.tempo) * 1000;
+
+        // if the mode is hard does not play the claps
         if (!hard) {
             scheduleBeats(setObject.tempo, [chordSound, baseSound, chordSound, midSound, chordSound, baseSound, chordSound, midSound], setObject.rhythm);
         } else {
             scheduleBeats(setObject.tempo, [chordSound, baseSound, chordSound, midSound, chordSound, baseSound, chordSound, midSound], []);
         }
+
+        //sets the image
         setImageSrc(setObject.src);
+
+        //sets clap lock timing for rehythm preview
         clapLocked.current = true;
         setTimeout(() => { clapLocked.current = false }, timeBetweenBeats * 3.5);
         await delay(timeBetweenBeats * 8);
     }
 
-
+    // makes the button change color depending on the change in score
     const displayCoolChange = (change: number) => {
         console.log("Cool change: " + change);
         if (change > 0) {
@@ -288,14 +360,17 @@ export default function GameComponent(props: GameComponentProps) {
         }
     }
 
+    // change the green proportion
     const handleGreenProportionChange = (newProportion: number) => {
         setGreenProportion(propor => Math.min(Math.max(propor + newProportion, 0), 1));
     };
 
+    // change the red proportion
     const handleRedProportionChange = (newProportion: number) => {
         setRedProportion(propor => Math.min(Math.max(propor + newProportion, 0), 1));
     };
 
+    // check if the user has hit the right key
     useEffect(() => {
         setRedProportion((red) => {
             return Math.min(red, 1 - greenProportion);
@@ -309,6 +384,7 @@ export default function GameComponent(props: GameComponentProps) {
         }
     }, [kedIsDown]);
 
+    // stop the music when the game ends
     useEffect(() => {
         if (isFinished) {
             clapSound.current!.volume = 0;
@@ -318,6 +394,7 @@ export default function GameComponent(props: GameComponentProps) {
         }
     }, [isFinished])
 
+    // the component
     return (
         <div className={`w-full h-full font-press-start`}>
             <div className="m-4 h-full">

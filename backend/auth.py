@@ -5,11 +5,16 @@ import os
 from dotenv import load_dotenv
 import jwt
 import datetime
+import logging
 
 # Load environment variables from .env file
 load_dotenv()
 
 router = APIRouter()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Get GitHub OAuth app credentials from environment variables
 CLIENT_ID = os.getenv('CLIENT_ID')
@@ -49,6 +54,8 @@ def callback(request: Request):
     user_info_response = requests.get(user_info_url, headers={'Authorization': f'token {access_token}'})
     user_info = user_info_response.json()
     print(user_info)
+    user_id = user_info.get('id')
+    username = user_info.get('login')
 
     # Generate JWT
     payload = {
@@ -60,6 +67,8 @@ def callback(request: Request):
     # Set JWT in cookie
     response = RedirectResponse(url='http://localhost:4321')
     response.set_cookie(key='jwt', value=token, httponly=True, secure=True)
+    response.set_cookie(key='user_id', value=str(user_id), httponly=True, secure=True)
+    response.set_cookie(key='username', value=str(username), httponly=True, secure=True)
 
     return response
 

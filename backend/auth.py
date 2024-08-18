@@ -54,6 +54,7 @@ def callback(request: Request):
     user_info_response = requests.get(user_info_url, headers={'Authorization': f'token {access_token}'})
     user_info = user_info_response.json()
     user_id = user_info.get('id')
+    username = user_info.get('login')
 
     # Generate JWT
     payload = {
@@ -66,6 +67,7 @@ def callback(request: Request):
     response = RedirectResponse(url='http://localhost:4321')
     response.set_cookie(key='jwt', value=token, httponly=True, secure=True)
     response.set_cookie(key='user_id', value=str(user_id), httponly=True, secure=True)
+    response.set_cookie(key='username', value=str(username), httponly=True, secure=True)
 
     return response
 

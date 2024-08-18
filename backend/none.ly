@@ -1,4 +1,4 @@
-\version "2.24.4"
+\version "2.25.18"
 \language "english"
 \score
 {
@@ -10,14 +10,11 @@
         {
             c8
             r8
-            r16
-            r16
-            c16
-            c16
-            c8
-            c8
             c8
             r8
+            c8
+            r8
+            r4
         % CLOSE_BRACKETS:
         }
     % CLOSE_BRACKETS:

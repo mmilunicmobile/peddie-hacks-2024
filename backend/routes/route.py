@@ -9,12 +9,12 @@ import jwt
 router = APIRouter()
 
 levelCollections = {
-    0: database.one_collection,
-    1: database.two_collection,
-    2: database.three_collection,
-    3: database.four_collection,
-    4: database.five_collection,
-    5: database.endless_collection
+    1: database.one_collection,
+    2: database.two_collection,
+    3: database.three_collection,
+    4: database.four_collection,
+    5: database.five_collection,
+    6: database.endless_collection
 }
 
 @router.get("/getuser/{level}/{username}")
@@ -35,14 +35,21 @@ async def get_user(userID: int):
     return user
 
 @router.post("/postscore/{level}")
-async def post_userScore(token: str, level: int, score: float):
+async def post_userScore(token: str, level: int, score: int):
     decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
     user_data = {
         'login': decoded['login'],
         'user_id': decoded['user_id']
     }
     user = User(name=user_data['login'], score=score)
-    levelCollections[level].insert_one(dict(user))
+    userEntry = levelCollections[level].find_one({'name': user.name})
+    if userEntry:
+        if user.score > userEntry.get('score'):
+            levelCollections[level].update_one({'name': user.name}, {'$set': {'score': user.score}}, upsert=True)
+    else:
+        levelCollections[level].update_one({'name': user.name}, {'$set': {'score': user.score}}, upsert=True)
+
+    
     return
 
 @router.get("/leaderboard/{level}/{username}")

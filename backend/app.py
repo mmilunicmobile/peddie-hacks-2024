@@ -96,13 +96,13 @@ def generateBeatTypesForMeasureEndless(sets: str, setNumber: int, time: float) -
     beatTypeList: List[BeatType] = []
     for x in range(4):
         randFloat = random.random()
-        if(randFloat <= pow(0.32, (sets + 2)/endlessQuarterFOC)):
+        if(randFloat <= pow(0.32, (setNumber + 2)/endlessQuarterFOC)):
             beatTypeList.append(BeatType.QUARTER)
-        elif(randFloat <= pow(0.32, (sets + 2)/endlessEighthFOC) + pow(0.32, (sets + 29)/endlessQuarterFOC)):
+        elif(randFloat <= pow(0.32, (setNumber + 2)/endlessEighthFOC) + pow(0.32, (setNumber + 29)/endlessQuarterFOC)):
             beatTypeList.append(BeatType.EIGHTH)
-        elif(randFloat <= pow(0.32, (sets + 2)/endlessEighthFOC) + pow(0.32, (sets + 29)/endlessQuarterFOC) + 0.32):
+        elif(randFloat <= pow(0.32, (setNumber + 2)/endlessEighthFOC) + pow(0.32, (setNumber + 29)/endlessQuarterFOC) + 0.32):
             beatTypeList.append(BeatType.SIXTEENTH)
-        elif(randFloat > pow(0.32, (sets + 2)/endlessEighthFOC) + pow(0.32, (sets + 29)/endlessQuarterFOC) + 0.32):
+        elif(randFloat > pow(0.32, (setNumber + 2)/endlessEighthFOC) + pow(0.32, (setNumber + 29)/endlessQuarterFOC) + 0.32):
             beatTypeList.append(BeatType.TRIPLET)   
     return beatTypeList       
 
@@ -127,7 +127,7 @@ def generateNoteValues(beatType: BeatType) -> Beat:
     note_name, notes_per_beat = beatType.value
     noteList: List[bool] = []
     for x in range(notes_per_beat):
-        noteList.append(random.random() > 0.45)
+        noteList.append(random.random() > 0.5)
     return Beat(beatType, noteList)
 
 # Test via: print(getFrontendListFromBeatList(generateMeasure([BeatType.QUARTER, BeatType.EIGHTH, BeatType.TRIPLET, BeatType.SIXTEENTH])))
@@ -149,17 +149,25 @@ def trim(im):
 # Generate the string used by lilypond to create the image file.
 def generateLilypondRhythmString(notes: List[Beat]):
     rhythmString = ""
+    uniqueRest = True
 
     for note in notes:
         noteValues = note.noteValues
         beatType = note.beatType
         beatLength = 4 * beatType.value[1]
         if beatLength != 12:
-            for note in noteValues:
-                if note:
+            for x in range(len(noteValues)):
+                if noteValues[x]:
                     rhythmString += "c" + str(beatLength) + " " 
+                    uniqueRest = True       
                 else:
-                    rhythmString += "r" + str(beatLength) + " " 
+                    if((x != len(noteValues) - 1) and (noteValues[x] == noteValues[x+1]) and (uniqueRest)):    
+                        rhythmString += "r" + str(int(beatLength/2)) + " "
+                        uniqueRest = False
+                    elif(uniqueRest == False):
+                        uniqueRest = True
+                    else:
+                        rhythmString += "r" + str(beatLength) + " "    
         else:
             tempString = "{"
             for note in noteValues:
@@ -169,7 +177,6 @@ def generateLilypondRhythmString(notes: List[Beat]):
                     tempString += "r8 "
             tempString += "} "
             rhythmString += "\\tuplet 3/2 " + tempString
-
     return rhythmString
 
 # Creates an image from the given rhythm string

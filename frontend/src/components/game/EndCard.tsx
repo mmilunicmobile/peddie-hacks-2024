@@ -44,7 +44,7 @@ export default function EndCard({ score, slug }: { score: number, slug: string }
         }
 
         // Send the POST request
-        fetch(`http://localhost:5000/postscore/${tempSlug}?token=${token}&score=${Math.round(score)}`, {
+        fetch(`https://api.letssign.xyz/postscore/${tempSlug}?token=${token}&score=${Math.round(score)}`, {
             method: 'POST',
             mode: 'no-cors',
             headers: {

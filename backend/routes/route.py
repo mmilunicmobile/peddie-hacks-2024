@@ -29,10 +29,10 @@ load_dotenv()
 
 JWT_SECRET = os.getenv('JWT_SECRET', 'your_jwt_secret')
 
-@router.get("/getuser/{userID}")
-async def get_user(userID: int):
-    user = list_serial(levelCollections[level].find(dict({"userid": userID})))
-    return user
+# @router.get("/getuser/{userID}")
+# async def get_user(userID: int):
+#     user = list_serial(levelCollections[level].find(dict({"userid": userID})))
+#     return user
 
 @router.post("/postscore/{level}")
 async def post_userScore(token: str, level: int, score: int):

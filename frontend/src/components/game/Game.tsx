@@ -43,6 +43,7 @@ export default function GameComponent(props: GameComponentProps) {
     const [timingKillers, setTimingKillers] = useState<number[]>([]);
     const [timeKill, setTimeKill] = useState(0);
     const [kedIsDown, setKedIsDown] = useState(false);
+    const imageRefs = useRef<(HTMLImageElement)[]>([]);
 
     let baseSound = useRef<HTMLAudioElement | null>(null);
     let midSound = useRef<HTMLAudioElement | null>(null);
@@ -92,14 +93,30 @@ export default function GameComponent(props: GameComponentProps) {
     // Makes a request to the server to get the next set
     const requestNextSet = async function (tempo: number | undefined) {
         console.log(backendURL);
-        // const result = await fetch(`/api/set/level/${levelIndex}/?number=${setNumber}&time=${time}`);
-        // const json = await result.json();
-        // console.log(json);
-        const json = {
-            tempo: 120,
-            rhythm: [0, 1, 2, 3,],
+        let tempIndex = levelIndex;
+        if (tempIndex === "endless") {
+            tempIndex = "6";
+        }
+        const result = await fetch(backendURL + `/api/set/level/${tempIndex}/?` + new URLSearchParams({
+            setNumber: (setNumber + 1).toString(),
+            time: time.toString()
+        }));
+        const json = await result.json();
+        console.log(json);
+        const backupJson = {
+            tempo: 60,
+            rhythm: [0, 0.25, 0.5, 0.75,
+                1, 1.25, 1.5, 1.75, 2.00,
+                2.25, 2.5, 2.75, 3,
+                3.25, 3.5, 3.75],
             src: "/images/testMusic.svg"
         }
+        json.src = backendURL + "/api/set/image/?" + new URLSearchParams({
+            q: json.src
+        });
+        var img = new Image();
+        img.src = json.src;
+        imageRefs.current.push(img);
         console.log(setNumber + 1, tempo ? time + (60 / tempo * 8) : time)
         return json;
     };
@@ -297,7 +314,7 @@ export default function GameComponent(props: GameComponentProps) {
                 <div className="w-full h-4/5">
                     <CardInset borderStyle={borderStyle.split(' ')[0] + " bg-background "}>
                         {!isFinished ? <>
-                            <WelcomeCard startCallback={(hard) => { startCallback() }} slug={levelIndex} timeAmount={endless ? "∞" : props.timeAmount} /><MusicDisplay countdown={countdown} src={imageSrc} />
+                            <WelcomeCard startCallback={(hard) => { startCallback() }} slug={levelIndex} setAmount={endless ? "Infinite" : props.setCount} /><MusicDisplay countdown={countdown} src={imageSrc} />
                             <div className="m-4 space-y-4 flex flex-col h-full">
                                 <CoolButton setClick={setKedIsDown} onClick={() => { makeClapHuman(true) }} />
                                 <div className="flex-none">
@@ -307,7 +324,7 @@ export default function GameComponent(props: GameComponentProps) {
                                         <ScoreBar greenProportion={greenProportion} redProportion={redProportion} />
                                     )}</div>
                             </div>
-                        </> : <EndCard slug={levelIndex} score={!endless ? (greenProportion * 100).toFixed(1) : time.toFixed(1)} />}
+                        </> : <EndCard slug={levelIndex} score={!endless ? (greenProportion * 100) : time} />}
                     </CardInset>
                 </div>
             </div>

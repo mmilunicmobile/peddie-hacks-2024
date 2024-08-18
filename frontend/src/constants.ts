@@ -5,7 +5,7 @@ export const levels = [{
     slug: 1,
     borderStyle: "border-indigo-500 bg-indigo-100",
     stars: 1,
-    seconds: 10,
+    seconds: Infinity,
     setCount: 3,
 },
 {
@@ -14,7 +14,7 @@ export const levels = [{
     slug: 2,
     borderStyle: "border-cyan-500 bg-cyan-100",
     stars: 2,
-    seconds: 20,
+    seconds: Infinity,
     setCount: 4,
 },
 {
@@ -23,7 +23,7 @@ export const levels = [{
     slug: 3,
     borderStyle: "border-green-500 bg-green-100",
     stars: 3,
-    seconds: 30,
+    seconds: Infinity,
     setCount: 5,
 },
 {
@@ -32,7 +32,7 @@ export const levels = [{
     slug: 4,
     borderStyle: "border-yellow-500 bg-yellow-100",
     stars: 4,
-    seconds: 40,
+    seconds: Infinity,
     setCount: 6,
 },
 {
@@ -41,7 +41,7 @@ export const levels = [{
     slug: 5,
     borderStyle: "border-orange-500 bg-orange-100",
     stars: 5,
-    seconds: 50,
+    seconds: Infinity,
     setCount: 7,
 },
 {
@@ -55,5 +55,5 @@ export const levels = [{
     setCount: Infinity,
 }];
 
-export const backendURL = "http://localhost:5000/"
+export const backendURL = "http://localhost:5000"
 export const timingTolerance = 0.08;

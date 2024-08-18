@@ -10,7 +10,14 @@ client = MongoClient("mongodb+srv://admin:IqDQW99dMffFm3se@cluster0.ljqdw.mongod
 
 db = client.leaderboard_db
 
-collection_name = db["leaderboard_collection"]
+one_collection = db["level1_leaderboard"]
+two_collection = db["level2_leaderboard"]
+three_collection = db["level3_leaderboard"]
+four_collection = db["level4_leaderboard"]
+five_collection = db["level5_leaderboard"]
+endless_collection = db["endless_leaderboard"]
+
+
 
 # Probably not the best idea to hardcode database credentials. I would recommend using something like .env (esp since I've alr used it in the auth
 # section) nevermind, I just did it for you

@@ -1,6 +1,6 @@
 # Import FastAPI for backend server communication
 import fastapi
-from fastapi.responses import FileResponse
+from fastapi.responses import Response
 from pydantic import BaseModel
 from enum import Enum
 from typing import List
@@ -10,9 +10,23 @@ import os
 from auth import router as auth_router
 from routes.route import router as score_router
 from PIL import Image, ImageChops
+import io
+from fastapi.middleware.cors import CORSMiddleware
 
 # Create FastAPI app
 app = fastapi.FastAPI()
+
+origins = [
+    "*",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(auth_router)
 app.include_router(score_router)
@@ -47,7 +61,7 @@ def generateBeatTypesForMeasureFinite(level: str, setNumber: int) -> List[BeatTy
             randFloat = random.random()
             if(randFloat <= 0.10):
                 beatTypeList.append(BeatType.QUARTER)
-            elif(randFloat > 0.10 & randFloat <= 0.20):
+            elif(randFloat > 0.10 and randFloat <= 0.20):
                 beatTypeList.append(BeatType.EIGHTH)
             else:
                 beatTypeList.append(BeatType.SIXTEENTH)
@@ -59,9 +73,9 @@ def generateBeatTypesForMeasureFinite(level: str, setNumber: int) -> List[BeatTy
             randFloat = random.random()
             if(randFloat <= 0.25):
                 beatTypeList.append(BeatType.QUARTER)
-            elif(randFloat <= 0.50 & randFloat > 0.25):
+            elif(randFloat <= 0.50 and randFloat > 0.25):
                 beatTypeList.append(BeatType.EIGHTH)
-            elif(randFloat <= 0.75 & randFloat > 0.50):
+            elif(randFloat <= 0.75 and randFloat > 0.50):
                 beatTypeList.append(BeatType.SIXTEENTH)
             elif(randFloat > 0.75):
                 beatTypeList.append(BeatType.TRIPLET)
@@ -97,7 +111,7 @@ def generateTempo(level: int, sets: int) -> int:
         case 5:
             return 110
         case 6:
-            return 100 * (1 * (0.05 * sets))
+            return 100 + (3 * sets)
 
 # Randomly generate all the notes in a beat
 def generateNoteValues(beatType: BeatType) -> Beat:
@@ -124,7 +138,7 @@ def trim(im):
         return im.crop(boundingBox)
 
     
-def generateLilyPondPNG(notes: List[Beat]):
+def generateLilypondRhythmString(notes: List[Beat]):
     rhythmString = ""
 
     for note in notes:
@@ -147,9 +161,13 @@ def generateLilyPondPNG(notes: List[Beat]):
             tempString += "} "
             rhythmString += "\\tuplet 3/2 " + tempString
 
+    return rhythmString
+
+# Creates an image from the given rhythm string
+def generateRhythmEndlessLilypondImage(rhythmString: str):
+    print(rhythmString)
     voice = abjad.Voice(rhythmString)
     staff = abjad.Staff([voice], name="rhythmEndless", lilypond_type="RhythmicStaff")
-    # abjad.show(staff)
     png = abjad.persist.as_png(staff, "none", resolution=300)
     im = Image.open(png[0][0]);
     width, height = im.size
@@ -157,11 +175,11 @@ def generateLilyPondPNG(notes: List[Beat]):
     im = trim(im)
     return im
 
-def finiteOrEndless(level: int, sets: int) -> List[BeatType]:
+def finiteOrEndless(level: int, sets: int, setNumber: int, time: float) -> List[BeatType]:
     if level == 6:
-        return generateBeatTypesForMeasureEndless(sets)
+        return generateBeatTypesForMeasureEndless(sets, setNumber, time)
     else:
-        return generateBeatTypesForMeasureFinite(level)
+        return generateBeatTypesForMeasureFinite(level, setNumber)
 
 # takes a list of beats and turns it into the frontend format
 def createFrontendList(beats: List[Beat]) -> List[float]:
@@ -178,23 +196,37 @@ def createFrontendList(beats: List[Beat]) -> List[float]:
     return timingsList
 
 @app.get("/api/set/level/{level}/")
-def getFrontendList(level: int, setNumber: int, time: float) -> List[float]:
-    return dict(generateTempo(level, setNumber), createFrontendList(generateMeasure(finiteOrEndless(level, setNumber))), FileResponse(generateLilyPondPNG))
+def getFrontendList(level: int, setNumber: int, time: float):
+    measure = generateMeasure(finiteOrEndless(level, setNumber, setNumber, time))
+    return {
+        "tempo": generateTempo(level, setNumber), 
+        "rhythm": createFrontendList(measure), 
+        "src": generateLilypondRhythmString(measure), #FileResponse(generateLilyPondPNG)
+    }
+
+@app.get("/api/set/image/")
+def getLilyPondImage(q: str):
+    img_byte_arr = io.BytesIO()
+    im = generateRhythmEndlessLilypondImage(q);
+    im.save(img_byte_arr, format='PNG')
+    img_byte_arr = img_byte_arr.getvalue()
+    return Response(img_byte_arr, media_type="image/png")
 
 # Define default root route
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
 
-@app.get("/test")
-async def test():
-    result = generateLilyPondPNG(generateMeasure(generateBeatTypesForMeasureEndless(13)))
-    return {"result": result}
+# @app.get("/test")
+# async def test():
+#     result = generateLilyPondPNG(generateMeasure(generateBeatTypesForMeasureEndless(13)))
+#     return {"result": result}
 
 # For some reason on windows you have to use this command even though port is defined
 # uvicorn app:app --reload --port 5000
 if __name__ == '__main__':
-    print(([generateLilyPondPNG(generateMeasure(generateBeatTypesForMeasureEndless(13, 0, 0)))]))
+    # print(([generateLilyPondPNG(generateMeasure(generateBeatTypesForMeasureEndless(13, 0, 0)))]))
+    # im = generateRhythmEndlessLilypondImage("r4 r4 c4 c4 ")
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5000) 
     

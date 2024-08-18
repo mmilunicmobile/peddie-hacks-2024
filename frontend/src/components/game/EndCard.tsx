@@ -28,7 +28,7 @@ function getCookie(cname: string) {
     return "";
 }
 
-export default function EndCard({ score, slug }: { score: string, slug: string }) {
+export default function EndCard({ score, slug }: { score: number, slug: string }) {
 
     useEffect(() => {
         console.log('EndCard component rendered');
@@ -38,8 +38,13 @@ export default function EndCard({ score, slug }: { score: string, slug: string }
         const token = getCookie('jwt') || '';
         console.log(userid, username)
 
+        let tempSlug = slug
+        if (slug === "endless") {
+            tempSlug = "6"
+        }
+
         // Send the POST request
-        fetch(`http://localhost:5000/postscore/${slug}?token=${token}&score=${score}`, {
+        fetch(`http://localhost:5000/postscore/${tempSlug}?token=${token}&score=${Math.round(score)}`, {
             method: 'POST',
             mode: 'no-cors',
             headers: {
@@ -66,7 +71,7 @@ export default function EndCard({ score, slug }: { score: string, slug: string }
                 <div className="flex flex-col xl:flex-row space-y-4 xl:space-y-0">
                     <div className="flex flex-col text-center flex-1 space-y-8 mx-auto">
                         <h1 className="text-2xl font-bold text-white font-press-start">Your Score</h1>
-                        <p className="text-4xl text-blue-700 font-press-start">{score}{slug === 'endless' ? ' s' : '%'}</p>
+                        <p className="text-4xl text-blue-700 font-press-start">{score.toFixed(1)}{slug === 'endless' ? ' s' : '%'}</p>
                         <a
                             href=""
                             className="text-blue-700 font-semibold font-press-start w-fit mx-auto"

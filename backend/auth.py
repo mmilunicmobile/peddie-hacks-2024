@@ -21,21 +21,26 @@ CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 JWT_SECRET = os.getenv('JWT_SECRET', 'your_jwt_secret')
 
+# This route is the home route of the application. It returns a welcome message.
 @router.get("/")
 def home():
     return {"message": "Welcome to the GitHub OAuth App"}
 
+# This route redirects the user to the GitHub OAuth login page
 @router.get("/login")
 def login():
     github_authorize_url = f"https://github.com/login/oauth/authorize?client_id={CLIENT_ID}"
     return RedirectResponse(github_authorize_url)
 
+# This route is the callback URL that GitHub will redirect to after the user logs in
 @router.get("/callback")
 def callback(request: Request):
+    # Get the code from the query parameters
     code = request.query_params.get('code')
     if not code:
         raise HTTPException(status_code=400, detail="Error: No code provided")
 
+    # Get the access token from GitHub
     token_url = 'https://github.com/login/oauth/access_token'
     token_data = {
         'client_id': CLIENT_ID,
@@ -72,6 +77,7 @@ def callback(request: Request):
 
     return response
 
+# A utility for debugging, specifically to check the contents and validility of the JWT
 @router.get("/verify-token")
 def verify_token(request: Request):
     token = request.cookies.get('jwt')

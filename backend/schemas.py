@@ -1,12 +1,14 @@
 from typing import List
 
+#Serialize a user id to submit to MongoDB.
 def individual_serial(user) -> dict:
     return {
         "id": str(user["_id"]),
         "name": user["name"],
         "score": user["score"]
     }
-
+    
+#Serialize a list of users.
 def list_serial(items):
     serialized_items = []
     for item in items:

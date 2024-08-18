@@ -16,10 +16,12 @@ from fastapi.middleware.cors import CORSMiddleware
 # Create FastAPI app
 app = fastapi.FastAPI()
 
+# Define the origins for the CORS middleware
 origins = [
     "*",
 ]
 
+# Add the CORS middleware to the app
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -28,15 +30,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Define the router for the auth and score routes
 app.include_router(auth_router)
 app.include_router(score_router)
 
+# Define the BeatType Enum to determine the type of beat and the number of notes in the beat
 class BeatType(Enum):
     QUARTER = ("quarter", 1)
     EIGHTH = ("eighth", 2)
     TRIPLET = ("triplet", 3)
     SIXTEENTH = ("sixteenth", 4)
 
+# Create a beat class used to determine the beat's subdivision and if they are rests or not.
 class Beat():
     beatType: BeatType
     noteValues: List[bool]
@@ -44,6 +49,7 @@ class Beat():
         self.beatType = beatVariant
         self.noteValues = noteList
 
+# For each normal level, generate a list of appropriate beat types for a measure.
 def generateBeatTypesForMeasureFinite(level: str, setNumber: int) -> List[BeatType]:
     beatTypeList: List[BeatType] = []
     if level == 1:
@@ -81,9 +87,11 @@ def generateBeatTypesForMeasureFinite(level: str, setNumber: int) -> List[BeatTy
                 beatTypeList.append(BeatType.TRIPLET)
     return beatTypeList
 
+# Factors of Change for the probabilities of quarter and eighth notes appearing in endless mode.
 endlessQuarterFOC = 3.0
 endlessEighthFOC = 30.0
 
+# Generate subdivisions for each beat for endless mode with probabilities changing based on set number.
 def generateBeatTypesForMeasureEndless(sets: str, setNumber: int, time: float) -> List[BeatType]:
     beatTypeList: List[BeatType] = []
     for x in range(4):
@@ -98,6 +106,7 @@ def generateBeatTypesForMeasureEndless(sets: str, setNumber: int, time: float) -
             beatTypeList.append(BeatType.TRIPLET)   
     return beatTypeList       
 
+# Assign a tempo for each level and scale the tempo for endless mode based upon set number.
 def generateTempo(level: int, sets: int) -> int:
     match level:
         case 1:
@@ -137,7 +146,7 @@ def trim(im):
     if boundingBox:
         return im.crop(boundingBox)
 
-    
+# Generate the string used by lilypond to create the image file.
 def generateLilypondRhythmString(notes: List[Beat]):
     rhythmString = ""
 
@@ -175,6 +184,7 @@ def generateRhythmEndlessLilypondImage(rhythmString: str):
     im = trim(im)
     return im
 
+# Determine which method to use based upon if the level is finite or endless.
 def finiteOrEndless(level: int, sets: int, setNumber: int, time: float) -> List[BeatType]:
     if level == 6:
         return generateBeatTypesForMeasureEndless(sets, setNumber, time)
@@ -195,15 +205,17 @@ def createFrontendList(beats: List[Beat]) -> List[float]:
             currentTime += beatLength
     return timingsList
 
+# Return a list containing the tempo, rhythm in frontend format, and rhythm in lilypond format
 @app.get("/api/set/level/{level}/")
 def getFrontendList(level: int, setNumber: int, time: float):
     measure = generateMeasure(finiteOrEndless(level, setNumber, setNumber, time))
     return {
         "tempo": generateTempo(level, setNumber), 
         "rhythm": createFrontendList(measure), 
-        "src": generateLilypondRhythmString(measure), #FileResponse(generateLilyPondPNG)
+        "src": generateLilypondRhythmString(measure),
     }
 
+# Return the Lilypond generated image in bytes.
 @app.get("/api/set/image/")
 def getLilyPondImage(q: str):
     img_byte_arr = io.BytesIO()
@@ -217,21 +229,8 @@ def getLilyPondImage(q: str):
 async def root():
     return {"message": "Hello World"}
 
-# @app.get("/test")
-# async def test():
-#     result = generateLilyPondPNG(generateMeasure(generateBeatTypesForMeasureEndless(13)))
-#     return {"result": result}
-
-# For some reason on windows you have to use this command even though port is defined
-# uvicorn app:app --reload --port 5000
+# Define the uvicorn import
 if __name__ == '__main__':
-    # print(([generateLilyPondPNG(generateMeasure(generateBeatTypesForMeasureEndless(13, 0, 0)))]))
-    # im = generateRhythmEndlessLilypondImage("r4 r4 c4 c4 ")
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5000) 
     
-
-'''
-if __name__ == "__main__":
-    print(([generateLilyPond(generateMeasure(generateBeatTypesForMeasure(13)))]))
-'''

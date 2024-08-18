@@ -6,7 +6,7 @@ load_dotenv()
 
 MONGO_PASSWORD = os.getenv('MONGO_PASSWORD')
 
-client = MongoClient("mongodb+srv://newadmin:"+MONGO_PASSWORD+"@cluster0.ljqdw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+client = MongoClient("mongodb+srv://newadmin:{MONGO_PASSWORD}@cluster0.ljqdw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 
 db = client.leaderboard_db
 

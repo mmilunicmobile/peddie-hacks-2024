@@ -28,6 +28,7 @@ export default function GameComponent(props: GameComponentProps) {
     // creates the states for the scoring
     let [greenProportion, setGreenProportion] = useState(0.0);
     let [redProportion, setRedProportion] = useState(0.0);
+    let lastHealthDifference = useRef(0.0);
     let [health, setHealth] = useState(1.0);
 
     // creates the states for the time
@@ -60,10 +61,10 @@ export default function GameComponent(props: GameComponentProps) {
 
     // the scores of each note in the current set (true, null, or false for eacj note depending on if it was hit or not)
     const [thisSetScores, setThisSetScores] = useState<(boolean | null)[]>([]);
-    const [thisSetTimes, setThisSetTimes] = useState<number[]>([]);
+    const [thisSetTimes, setThisSetTimes] = useState<number[][]>([[]]);
 
     // the timings of the notes in the current bar relative to time
-    const [timings, setTimings] = useState<number[]>([]);
+    const [timings, setTimings] = useState<number[][]>([]);
 
     // the current tempo
     const [componentTempo, setComponentTempo] = useState(60);
@@ -133,14 +134,14 @@ export default function GameComponent(props: GameComponentProps) {
         setCountdown("Play!");
         await delay(1000);
         setTimeKill(setInterval(() => {
-            setTime((t) => t + 0.02);
-        }, 20));
+            setTime((t) => t + 0.01);
+        }, 10));
         setSetNumber((i) => i + 1);
     }
 
     // Makes a request to the server to get the next set
     const requestNextSet = async function (tempo: number | undefined) {
-        console.log(backendURL);
+        //console.log(backendURL);
         let tempIndex = levelIndex;
         if (tempIndex === "endless") {
             tempIndex = "6";
@@ -150,7 +151,7 @@ export default function GameComponent(props: GameComponentProps) {
             time: time.toString()
         }));
         const json = await result.json();
-        console.log(json);
+        //console.log(json);
 
         // example of json schema
         // {
@@ -169,7 +170,7 @@ export default function GameComponent(props: GameComponentProps) {
         var img = new Image();
         img.src = json.src;
         imageRefs.current.push(img);
-        console.log(setNumber + 1, tempo ? time + (60 / tempo * 8) : time)
+        //console.log(setNumber + 1, tempo ? time + (60 / tempo * 8) : time)
 
         return json;
     };
@@ -186,68 +187,30 @@ export default function GameComponent(props: GameComponentProps) {
     }
 
     // makes a clap sound but from a human source
-    function makeClapHuman(sound = true) {
-        if (!clapLocked.current) {
-            if (sound) {
-                makeClap();
-            }
-            console.log("clap");
+    // function makeClapHuman(sound = true) {
+    //     if (!clapLocked.current) {
+    //         if (sound) {
+    //             makeClap();
+    //         }
+    //         //console.log("clap");
 
-            // calculates which beat was closest
-            const timingDiffs = timings.map((t) => {
-                return Math.abs(time - t)
-            });
-            console.log(timingDiffs);
-            const min = Math.min(...timingDiffs);
-            const index = timingDiffs.indexOf(min);
+    //         // calculates which beat was closest
+    //         const timingDiffs = timings.map((t) => {
+    //             return Math.abs(time - t)
+    //         });
+    //         //console.log(timingDiffs);
+    //         const min = Math.min(...timingDiffs);
+    //         const index = timingDiffs.indexOf(min);
 
-            // updates the score based on that information
-            console.log(timingDiffs)
-            console.log(index, min);
-            console.log(thisSetScores);
-            clearTimeout(timingKillers[index]);
-            // includes wether or not it was within tolerance
-            updateScore(index, min < timingTolerance)
-        }
-    }
-
-
-    // updates the score
-    function updateScore(index: number, score: boolean | null) {
-        setThisSetScores((inArray) => {
-            const dupeArray = inArray.slice();
-            dupeArray[index] = score;
-            let posDif = 0;
-            let negDif = 0;
-            // if the note was unscored, scores it based on timing
-            if (thisSetScores[index] === null) {
-                if (score === true) {
-                    posDif = 1;
-                } else if (score === false) {
-                    negDif = 1;
-                }
-                // if the note was scored, its a double click so it invalidates it
-            } else if (thisSetScores[index] === true) {
-                posDif = -1;
-                negDif = 1;
-                dupeArray[index] = false;
-            }
-
-            // calculates the difference in score
-            const posDifNorm = (posDif) / thisSetScores.length / props.setCount
-            const negDifNorm = (negDif) / thisSetScores.length / props.setCount
-
-            // updates the health
-            setHealth(Math.max(health - negDif * 0.2, 0));
-            handleGreenProportionChange(posDifNorm);
-            handleRedProportionChange(negDifNorm);
-            displayCoolChange(posDifNorm - negDifNorm);
-            //updates the note scores
-            return dupeArray;
-        });
-
-
-    }
+    //         // updates the score based on that information
+    //         //console.log(timingDiffs)
+    //         //console.log(index, min);
+    //         //console.log(thisSetScores);
+    //         clearTimeout(timingKillers[index]);
+    //         // includes wether or not it was within tolerance
+    //         updateScore(index, min < timingTolerance)
+    //     }
+    // }
 
     // schedules beats based on the tempo, the beat types, and what times there should be claps
     function scheduleBeats(tempo: number, counts: React.MutableRefObject<HTMLAudioElement | null>[], beats: number[]) {
@@ -291,11 +254,11 @@ export default function GameComponent(props: GameComponentProps) {
             };
             if (!endless && setNumber + 1 > props.setCount) {
                 setIsFinished(true);
-                console.log("Finished");
+                //console.log("Finished");
                 return;
             } else if (endless && health <= 0) {
                 setIsFinished(true);
-                console.log("Finished");
+                //console.log("Finished");
                 return;
             }
             setCurrentSet(nextSet);
@@ -311,20 +274,9 @@ export default function GameComponent(props: GameComponentProps) {
             if (currentSet) {
                 setThisSetScores(currentSet?.rhythm.map((r) => null) || []);
                 setComponentTempo(currentSet.tempo);
-                setTimings(currentSet.rhythm.map((r) => time + (60 / currentSet.tempo * (r + 4))));
-                const tempKillers = currentSet.rhythm.slice();
-                for (let i = 0; i < currentSet.rhythm.length; i++) {
-                    tempKillers[i] = setTimeout(
-                        () => {
-                            const negDifNorm = 1 / currentSet.rhythm.length / props.setCount
-                            handleRedProportionChange(negDifNorm);
-                            setHealth((health) => Math.max(health - 1 * 0.2, 0));
-                            displayCoolChange(-negDifNorm);
-                        },
-                        ((60 / currentSet.tempo * (currentSet.rhythm[i] + 4)) + timingTolerance) * 1000);
-                }
-                setTimingKillers(tempKillers);
+                setTimings((timings) => [...timings, currentSet.rhythm.map((r) => time + (60 / currentSet.tempo * (r + 4)))]);
                 await runSet(currentSet);
+                setThisSetTimes((thisSetTimes) => [...thisSetTimes, []]);
                 setSetNumber(i => i + 1);
             }
         })();
@@ -364,7 +316,7 @@ export default function GameComponent(props: GameComponentProps) {
 
     // makes the button change color depending on the change in score
     const displayCoolChange = (change: number) => {
-        console.log("Cool change: " + change);
+        //console.log("Cool change: " + change);
         if (change > 0) {
             setGlow("green");
             setTimeout(() => { setGlow("white") }, 100);
@@ -374,29 +326,22 @@ export default function GameComponent(props: GameComponentProps) {
         }
     }
 
+    useEffect(() => {
+        const currentDifference = greenProportion - redProportion;
+        const changeInDif = currentDifference - lastHealthDifference.current;
+        displayCoolChange(changeInDif);
+        lastHealthDifference.current = currentDifference;
+    }, [redProportion, greenProportion])
+
     // change the green proportion
-    const handleGreenProportionChange = (newProportion: number) => {
-        setGreenProportion(propor => Math.min(Math.max(propor + newProportion, 0), 1));
-    };
+    // const handleGreenProportionChange = (newProportion: number) => {
+    //     setGreenProportion(propor => Math.min(Math.max(propor + newProportion, 0), 1));
+    // };
 
-    // change the red proportion
-    const handleRedProportionChange = (newProportion: number) => {
-        setRedProportion(propor => Math.min(Math.max(propor + newProportion, 0), 1));
-    };
-
-    // check if the user has hit the right key
-    useEffect(() => {
-        setRedProportion((red) => {
-            return Math.min(red, 1 - greenProportion);
-        })
-    }, [greenProportion]);
-
-    useEffect(() => {
-        if (kedIsDown) {
-            setKedIsDown(false);
-            makeClapHuman(true)
-        }
-    }, [kedIsDown]);
+    // // change the red proportion
+    // const handleRedProportionChange = (newProportion: number) => {
+    //     setRedProportion(propor => Math.min(Math.max(propor + newProportion, 0), 1));
+    // };
 
     // stop the music when the game ends
     useEffect(() => {
@@ -409,16 +354,121 @@ export default function GameComponent(props: GameComponentProps) {
         }
     }, [isFinished])
 
+    // useEffect(() => {
+    //     console.log("Click Times:", thisSetTimes);
+    // }, [thisSetTimes])
+
+    // useEffect(() => {
+    //     console.log("Timings:", timings);
+    // }, [timings])
+
+    const myClickMan = useCallback(() => {
+        if (!clapLocked.current) {
+            setThisSetTimes((times) => [...times.slice(0, -1), [...(times[times.length - 1]), time]]);
+            makeClap();
+        }
+    }, [time])
+
+    function updateScoreCalculations(userTimesAll: number[][], correctTimesAll: number[][]) {
+        if (!currentSet) {
+            return;
+        }
+        try {
+
+            let totalIncorrectCount = 0;
+            let totalCorrectCount = 0;
+
+            for (let bar = 0; bar < userTimesAll.length && bar < correctTimesAll.length; bar++) {
+                const userTimes = userTimesAll[bar];
+                const correctTimes = correctTimesAll[bar];
+                const beats: (boolean | null)[] = correctTimes.map((t) => null);
+                let incorrectCount = 0;
+                let correctCount = 0;
+
+                if (correctTimes.length === 0) {
+                    if (userTimes.length > 0) {
+                        incorrectCount = 1;
+                    } else {
+                        correctCount = 1;
+                    }
+                } else {
+                    for (let i = 0; i < userTimes.length; i++) {
+                        const timingDiffs = correctTimes.map((t) => {
+                            return Math.abs(userTimes[i] - t)
+                        });
+                        const min = Math.min(...timingDiffs);
+                        const index = timingDiffs.indexOf(min);
+                        const correct = min <= timingTolerance;
+                        if (correct) {
+                            if (beats[index] === null) {
+                                beats[index] = true;
+                            } else {
+                                beats[index] = false;
+                            }
+                        } else {
+                            // console.log("Wrong: " + userTimes[i] + " " + correctTimes[index]);
+                            beats[index] = false;
+                        }
+                    }
+
+                    let maxIndexScored = -1;
+
+                    correctTimes.forEach((t, i) => {
+                        if ((t + timingTolerance) < time || beats[i] !== null) {
+                            maxIndexScored = i;
+                        }
+                    });
+
+                    for (let i = 0; i <= maxIndexScored; i++) {
+                        if (beats[i] === true) {
+                            correctCount++;
+                        } else {
+                            incorrectCount++;
+                        }
+                    }
+
+                    if (!endless) {
+                        incorrectCount /= correctTimes.length;
+                        correctCount /= correctTimes.length;
+                    } else {
+                        // just leave them be
+                    }
+                }
+
+                if (!endless) {
+                    totalIncorrectCount += incorrectCount / props.setCount;
+                    totalCorrectCount += correctCount / props.setCount;
+                } else {
+                    totalIncorrectCount += incorrectCount;
+                    totalCorrectCount += correctCount;
+                }
+            }
+            if (!endless) {
+                setRedProportion(totalIncorrectCount);
+                setGreenProportion(totalCorrectCount);
+            } else {
+                setRedProportion(totalIncorrectCount);
+                setGreenProportion(totalCorrectCount);
+                setHealth(1 - totalIncorrectCount / 5);
+            }
+            // console.log(totalIncorrectCount, totalCorrectCount);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    useEffect(() => updateScoreCalculations(thisSetTimes, timings), [thisSetTimes, time])
+
     // the component
     return (
         <div className={`w-full h-full font-press-start`}>
             <div className="m-4 h-full">
                 <div className="w-full h-4/5">
-                    <CardInset borderStyle={borderStyle.split(' ')[0] + " bg-background "}>
+                    <CardInset borderStyle={borderStyle.split(' ')[0] + " bg-white "}>
                         {!isFinished ? <>
                             <WelcomeCard startCallback={(hard) => { startCallback() }} slug={levelIndex} setAmount={endless ? "Infinite" : props.setCount} /><MusicDisplay countdown={countdown} src={imageSrc} />
                             <div className="m-4 space-y-4 flex flex-col h-full">
-                                <CoolButton setClick={setKedIsDown} onClick={() => { makeClapHuman(true) }} glowColor={glow}>{computerTurn}</CoolButton>
+                                <CoolButton onClick={myClickMan} time={time} glowColor={glow}>{computerTurn}</CoolButton>
                                 <div className="flex-none">
                                     {levelIndex === "endless" ? (
                                         <HealthBar health={health} time={time} />

@@ -50,7 +50,7 @@ export default function CoolButton({ onClick, time, glowColor, children, }: Cool
                     transition:
                         "transform 0.05s ease-out"
                 }}>
-                    <Card borderStyle="border-foreground">
+                    <Card borderStyle="border-foreground bg-background">
                         <div className="w-full h-full flex" style={{
                             backgroundColor: glowColor,
                             transition: "background-color 0.05s ease-out",

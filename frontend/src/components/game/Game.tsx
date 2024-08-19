@@ -7,6 +7,7 @@ import MusicDisplay from "./MusicDisplay.tsx";
 import CoolButton from "./CoolButton.tsx";
 import EndCard from "./EndCard.tsx";
 import { backendURL, timingTolerance } from "../../constants.ts";
+import { Howl, Howler } from 'howler';
 
 interface GameComponentProps {
     borderStyle: string
@@ -30,6 +31,8 @@ export default function GameComponent(props: GameComponentProps) {
     let [redProportion, setRedProportion] = useState(0.0);
     let lastHealthDifference = useRef(0.0);
     let [health, setHealth] = useState(1.0);
+
+    let startTime = useRef(0.0);
 
     // creates the states for the time
     let [time, setTime] = useState(0.0);
@@ -60,7 +63,6 @@ export default function GameComponent(props: GameComponentProps) {
     const [isFinished, setIsFinished] = useState(false);
 
     // the scores of each note in the current set (true, null, or false for eacj note depending on if it was hit or not)
-    const [thisSetScores, setThisSetScores] = useState<(boolean | null)[]>([]);
     const [thisSetTimes, setThisSetTimes] = useState<number[][]>([[]]);
 
     // the timings of the notes in the current bar relative to time
@@ -82,17 +84,17 @@ export default function GameComponent(props: GameComponentProps) {
     const imageRefs = useRef<(HTMLImageElement)[]>([]);
 
     // the color of the button
-    const [glow, setGlow] = useState("white");
+    const [glow, setGlow] = useState("#fbfbfe");
 
     // if it is the computer's turn
     const [computerTurn, setComputerTurn] = useState("");
 
     // the sound effects
-    let baseSound = useRef<HTMLAudioElement | null>(null);
-    let midSound = useRef<HTMLAudioElement | null>(null);
-    let chordSound = useRef<HTMLAudioElement | null>(null);
-    let clapSound = useRef<HTMLAudioElement | null>(null);
-    let bellSound = useRef<HTMLAudioElement | null>(null);
+    let baseSound = useRef<Howl | null>(null);
+    let midSound = useRef<Howl | null>(null);
+    let chordSound = useRef<Howl | null>(null);
+    let clapSound = useRef<Howl | null>(null);
+    let bellSound = useRef<Howl | null>(null);
 
     // a function to delay execution
     const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
@@ -110,11 +112,20 @@ export default function GameComponent(props: GameComponentProps) {
 
     // loads the sounds
     useEffect(() => {
-        baseSound.current = new Audio('/music/base.mp3');
-        midSound.current = new Audio('/music/mid.mp3');
-        chordSound.current = new Audio('/music/chord.mp3');
-        clapSound.current = new Audio('/music/clap.mp3');
-        bellSound.current = new Audio('/music/bell.mp3');
+        const createHowl = (src: string[], format?: string[]) => new Howl({
+            src: src,
+            onloaderror: (e, f) => { console.log("error loading " + src + " " + f) },
+            onload: () => {
+                console.log("loaded " + src);
+            },
+            format: format
+        });
+        baseSound.current = createHowl(['/music/base.mp3']);
+        midSound.current = createHowl(['/music/mid.mp3']);
+        chordSound.current = createHowl(['/music/chord.mp3']);
+        // m4a is cuz safari doesnt like the mp3s for some reason
+        clapSound.current = createHowl(['/music/clap.m4a', "/music/clap.mp3",]);
+        bellSound.current = createHowl(['/music/bell.m4a', "/music/clap.mp3"]);
     }, []);
 
 
@@ -133,8 +144,9 @@ export default function GameComponent(props: GameComponentProps) {
         await delay(1000);
         setCountdown("Play!");
         await delay(1000);
+        startTime.current = Date.now();
         setTimeKill(setInterval(() => {
-            setTime((t) => t + 0.01);
+            setTime(() => (Date.now() - startTime.current) / 1000);
         }, 10));
         setSetNumber((i) => i + 1);
     }
@@ -177,17 +189,21 @@ export default function GameComponent(props: GameComponentProps) {
 
     // makes a clap sound
     function makeClap() {
-        clapSound.current!.currentTime = 0;
+        clapSound.current!.stop();
         clapSound.current?.play();
+        // console.log(clapSound.current?.state());
+        // console.log("Clap!")
     }
 
     function makeBell() {
-        bellSound.current!.currentTime = 0;
+        bellSound.current!.stop();
         bellSound.current?.play();
+        // console.log(bellSound.current?.state());
+        // console.log("Bell!")
     }
 
     // schedules beats based on the tempo, the beat types, and what times there should be claps
-    function scheduleBeats(tempo: number, counts: React.MutableRefObject<HTMLAudioElement | null>[], beats: number[]) {
+    function scheduleBeats(tempo: number, counts: React.MutableRefObject<Howl | null>[], beats: number[]) {
         const timeBetweenBeats = (60 / tempo) * 1000;
         const beatLength = 0.5 * timeBetweenBeats;
 
@@ -197,10 +213,7 @@ export default function GameComponent(props: GameComponentProps) {
                 counts[i].current?.play();
             }, timeBetweenBeats * i);
             setTimeout(() => {
-                counts[i].current?.pause();
-                if (counts[i].current) {
-                    counts[i].current!.currentTime = 0;
-                }
+                counts[i].current?.stop();
             }, timeBetweenBeats * i + beatLength);
         }
 
@@ -246,9 +259,6 @@ export default function GameComponent(props: GameComponentProps) {
     useEffect(() => {
         (async () => {
             if (currentSet) {
-                setThisSetScores(currentSet?.rhythm.map((r) => null) || []);
-                setComponentTempo(currentSet.tempo);
-                setTimings((timings) => [...timings, currentSet.rhythm.map((r) => time + (60 / currentSet.tempo * (r + 4)))]);
                 await runSet(currentSet);
                 setThisSetTimes((thisSetTimes) => [...thisSetTimes, []]);
                 setSetNumber(i => i + 1);
@@ -265,9 +275,12 @@ export default function GameComponent(props: GameComponentProps) {
     }
 
     // runs a set
-    async function runSet(setObject: SetObject) {
+    async function runSet(setObject: SetObject, startTime?: number) {
         // calculates the time between beats
         const timeBetweenBeats = (60 / setObject.tempo) * 1000;
+
+        setComponentTempo(setObject.tempo);
+        setTimings((timings) => [...timings, setObject.rhythm.map((r) => time + (60 / setObject.tempo * (r + 4)))]);
 
         // if the mode is hard does not play the claps
         if (!hard) {
@@ -311,11 +324,11 @@ export default function GameComponent(props: GameComponentProps) {
     // stop the music when the game ends
     useEffect(() => {
         if (isFinished) {
-            clapSound.current!.volume = 0;
-            baseSound.current!.volume = 0;
-            chordSound.current!.volume = 0;
-            midSound.current!.volume = 0;
-            bellSound.current!.volume = 0;
+            clapSound.current!.volume(0);
+            baseSound.current!.volume(0);
+            chordSound.current!.volume(0);
+            midSound.current!.volume(0);
+            bellSound.current!.volume(0);
         }
     }, [isFinished])
 
@@ -415,7 +428,15 @@ export default function GameComponent(props: GameComponentProps) {
         }
     }
 
-    useEffect(() => updateScoreCalculations(thisSetTimes, timings), [thisSetTimes, time])
+    // useEffect(() => {
+    //     console.log("player times: ", thisSetTimes);
+    // }, [thisSetTimes])
+
+    // useEffect(() => {
+    //     console.log("timings: ", timings);
+    // }, [timings])
+
+    useEffect(() => updateScoreCalculations(thisSetTimes, timings), [time])
 
     // the component
     return (

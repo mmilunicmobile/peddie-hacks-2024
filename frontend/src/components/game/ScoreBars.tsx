@@ -61,21 +61,18 @@ export function HealthBar(props: HealthBarProps) {
     return (
         <div className="w-full h-12 flex">
             <Card borderStyle="border-foreground bg-background">
-                <div className="flex h-full bg-gray-200">
-                    <div className="text-2xl font-bold text-black z-10 absolute left-0 right-0 top-0 bottom-0 m-auto text-center">{greenDisplayText}</div>
-                    <div className="h-full overflow-visible text-left flex-none transition-all flex" style={
+                <div className="flex h-full bg-gray-200 relative">
+                    <div className="text-2xl font-bold text-black z-10 absolute left-0 top-0 bottom-0 right-0 flex"><div className="m-auto">{greenDisplayText}</div></div>
+                    <div className="h-full overflow-visible text-left transition-all flex" style={
                         {
                             width: `${health * 100}%`,
                         }}>
 
                         <div className="bg-red-600 z-0 flex-auto"></div>
                     </div>
-                    <div className=" h-full flex-auto"
-                    ></div>
-
                 </div>
             </Card >
-            <div className="text-2xl font-bold text-black flex-none my-auto mx-4 min-w-28 text-right font-mono">{displayTime.toFixed(1)} s</div>
+            <div className="text-xl font-bold text-black flex-none my-auto mx-4 min-w-32 text-right">{displayTime.toFixed(1)} s</div>
         </div >
     )
 }

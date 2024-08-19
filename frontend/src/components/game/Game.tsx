@@ -186,32 +186,6 @@ export default function GameComponent(props: GameComponentProps) {
         bellSound.current?.play();
     }
 
-    // makes a clap sound but from a human source
-    // function makeClapHuman(sound = true) {
-    //     if (!clapLocked.current) {
-    //         if (sound) {
-    //             makeClap();
-    //         }
-    //         //console.log("clap");
-
-    //         // calculates which beat was closest
-    //         const timingDiffs = timings.map((t) => {
-    //             return Math.abs(time - t)
-    //         });
-    //         //console.log(timingDiffs);
-    //         const min = Math.min(...timingDiffs);
-    //         const index = timingDiffs.indexOf(min);
-
-    //         // updates the score based on that information
-    //         //console.log(timingDiffs)
-    //         //console.log(index, min);
-    //         //console.log(thisSetScores);
-    //         clearTimeout(timingKillers[index]);
-    //         // includes wether or not it was within tolerance
-    //         updateScore(index, min < timingTolerance)
-    //     }
-    // }
-
     // schedules beats based on the tempo, the beat types, and what times there should be claps
     function scheduleBeats(tempo: number, counts: React.MutableRefObject<HTMLAudioElement | null>[], beats: number[]) {
         const timeBetweenBeats = (60 / tempo) * 1000;
@@ -333,15 +307,6 @@ export default function GameComponent(props: GameComponentProps) {
         lastHealthDifference.current = currentDifference;
     }, [redProportion, greenProportion])
 
-    // change the green proportion
-    // const handleGreenProportionChange = (newProportion: number) => {
-    //     setGreenProportion(propor => Math.min(Math.max(propor + newProportion, 0), 1));
-    // };
-
-    // // change the red proportion
-    // const handleRedProportionChange = (newProportion: number) => {
-    //     setRedProportion(propor => Math.min(Math.max(propor + newProportion, 0), 1));
-    // };
 
     // stop the music when the game ends
     useEffect(() => {
@@ -354,13 +319,6 @@ export default function GameComponent(props: GameComponentProps) {
         }
     }, [isFinished])
 
-    // useEffect(() => {
-    //     console.log("Click Times:", thisSetTimes);
-    // }, [thisSetTimes])
-
-    // useEffect(() => {
-    //     console.log("Timings:", timings);
-    // }, [timings])
 
     const myClickMan = useCallback(() => {
         if (!clapLocked.current) {

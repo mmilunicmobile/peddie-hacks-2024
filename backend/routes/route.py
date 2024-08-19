@@ -5,6 +5,8 @@ from schemas import list_serial
 from bson import ObjectId
 from enum import Enum
 import jwt
+import os
+from dotenv import load_dotenv
 
 router = APIRouter()
 

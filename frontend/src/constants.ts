@@ -55,5 +55,5 @@ export const levels = [{
     setCount: Infinity,
 }];
 
-export const backendURL = "https://api.letssign.xyz";
+export const backendURL = "https://api.letssign.xyz"; //"http://localhost:5000";
 export const timingTolerance = 0.08;

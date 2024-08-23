@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { levels } from '../../constants.ts';
+import { backendURL, levels } from '../../constants.ts';
 import '../../styles/base.css';
 import Card from '../Card.jsx';
 
@@ -32,7 +32,7 @@ export default function WelcomeCard({ startCallback, slug, setAmount }: { startC
                     {slug === "1" && <p className="text-center text-sm mb-6 text-white font-press-start">To play, click the big button in the center to the rhythm
                         of the bar of music on the screen. The more accurate your clicks, the more points
                         you get. For every bar it will play it once for you, and then you play it by your self. If
-                        you <a href="https://api.letssign.xyz/login" className="underline">login with GitHub</a>, your scores can go
+                        you <a href={`${backendURL}/login`} className="underline">login with GitHub</a>, your scores can go
                         on the leaderboard. Good luck!</p>}
                     {(slug === "2" || slug === "3" || slug === "4" || slug === "5") && <p className="text-center text-sm mb-6 text-white font-press-start">Same Rules as before, just harder rhythms.</p>}
                     {(slug === "endless") && <p className="text-center text-sm mb-6 text-white font-press-start">Now instead of a percent being your score, the time you take to die is your score. You have five mistakes before the level ends. How long can you stay alive?</p>}

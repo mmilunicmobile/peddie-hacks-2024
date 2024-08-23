@@ -1,3 +1,7 @@
+---
+import { backendURL } from "../constants";
+---
+
 <!-- Navbar component for website -->
 <nav
     class="bg-black bg-opacity-100 backdrop-blur p-5 flex justify-between items-center"
@@ -28,7 +32,7 @@
         </li>
         <li id="auth-link">
             <a
-                href="https://api.letssign.xyz/login"
+                href=`${backendURL}/login`
                 class="text-white border border-white px-4 py-2 hover:bg-white hover:text-black transition font-press-start"
             >
                 Login
@@ -38,6 +42,8 @@
 </nav>
 
 <script>
+    import { backendURL } from "../constants";
+
     // Function to get a cookie by name
     function getCookie(name: string) {
         const value = `; ${document.cookie}`;
@@ -82,7 +88,7 @@
                 }
             } else {
                 authLink.innerHTML = `
-                    <a href="https://api.letssign.xyz/login" class="text-white border border-white px-4 py-2 hover:bg-white hover:text-black transition font-press-start">
+                    <a href="${backendURL}/login" class="text-white border border-white px-4 py-2 hover:bg-white hover:text-black transition font-press-start">
                         Login
                     </a>
                 `;

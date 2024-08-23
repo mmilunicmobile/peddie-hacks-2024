@@ -1,4 +1,4 @@
-\version "2.25.18"
+\version "2.24.4"
 \language "english"
 \score
 {
@@ -8,13 +8,13 @@
         % OPEN_BRACKETS:
         \new Voice
         {
-            c8
-            r8
-            c8
-            r8
-            c8
-            r8
             r4
+            c8
+            r8
+            c8
+            r8
+            r8
+            c8
         % CLOSE_BRACKETS:
         }
     % CLOSE_BRACKETS:

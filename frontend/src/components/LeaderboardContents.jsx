@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import Card from "./Card"
 import LeaderboardSlot from "./LeaderboardSlot"
+import { backendURL } from "../constants";
 
 // Creates a list of leaderboard entries
 export default function LeaderboardContents({ length, slug, borderStyle }) {
@@ -15,7 +16,7 @@ export default function LeaderboardContents({ length, slug, borderStyle }) {
         } else {
             tempSlug = slug
         }
-        fetch(`https://api.letssign.xyz/leaderboard/${tempSlug}/username`)
+        fetch(`${backendURL}/leaderboard/${tempSlug}/username`)
             .then(response => response.json())
             .then(data => {
                 setPeople(data)

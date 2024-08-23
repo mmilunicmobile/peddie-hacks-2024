@@ -26,14 +26,14 @@ JWT_SECRET = os.getenv('JWT_SECRET', 'your_jwt_secret')
 
 #A simple get request if we need one.
 @router.get("/getuser/{level}/{username}")
-async def get_user(username: str, level: int):
+def get_user(username: str, level: int):
     user = list_serial(levelCollections[level].find(dict({"username": username})))
 from dotenv import load_dotenv
 import os
 
 #A method to post scores that overwrites past scores if the submitted one is higher.
 @router.post("/postscore/{level}")
-async def post_userScore(token: str, level: int, score: int):
+def post_userScore(token: str, level: int, score: int):
     decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
     user_data = {
         'login': decoded['login'],
@@ -54,7 +54,7 @@ async def post_userScore(token: str, level: int, score: int):
 
 #A method to retrieve the top ten users of a leaderboard.
 @router.get("/leaderboard/{level}/{username}")
-async def get_leaderboard(level: int, username:str):
+def get_leaderboard(level: int, username:str):
     leaderboard = list_serial(levelCollections[level].find().sort("score", -1))
     del leaderboard[10:]
     return leaderboard

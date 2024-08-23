@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { levels } from '../../constants.ts';
+import { backendURL, levels } from '../../constants.ts';
 import '../../styles/base.css';
 import Card from '../Card.jsx';
 import LeaderboardContents from '../LeaderboardContents.jsx';
@@ -41,7 +41,7 @@ export default function EndCard({ score, slug }: { score: number, slug: string }
         }
 
         // Send the POST request
-        fetch(`https://api.letssign.xyz/postscore/${tempSlug}?token=${token}&score=${Math.round(score)}`, {
+        fetch(`${backendURL}/postscore/${tempSlug}?token=${token}&score=${Math.round(score)}`, {
             method: 'POST',
             mode: 'no-cors',
             headers: {
